@@ -981,6 +981,8 @@
         
         let currentPage = 0;
         let activeSentenceIndex = -1;
+        let currentPdfDocument = null;
+        let isCanvasMode = false;
         
         // Progress parameters passed from backend
         const savedPage = parseInt("{{ saved_page|default:0 }}");
@@ -1024,16 +1026,27 @@
             // Check cache or configuration URL
             const cachedPages = localStorage.getItem('parsed_pages_' + bookKey);
             const cachedLabel = localStorage.getItem('parsed_pages_label_' + bookKey);
+            const cachedCanvasMode = localStorage.getItem('parsed_pages_canvas_mode_' + bookKey);
             const configuredUrl = localStorage.getItem('pdf_url_' + bookKey);
             
             if (cachedPages) {
                 try {
                     const parsed = JSON.parse(cachedPages);
+                    isCanvasMode = cachedCanvasMode === 'true';
+                    
+                    // Pre-load PDF in the background if canvas rendering is needed
+                    if (isCanvasMode && serverPdfUrl) {
+                        pdfjsLib.getDocument(serverPdfUrl).promise.then(pdf => {
+                            currentPdfDocument = pdf;
+                        }).catch(e => console.error("Failed to load background PDF:", e));
+                    }
+                    
                     setParsedBookPages(parsed, cachedLabel || "Cached Document");
                 } catch (e) {
                     console.error("Failed to parse cached pages:", e);
                     localStorage.removeItem('parsed_pages_' + bookKey);
                     localStorage.removeItem('parsed_pages_label_' + bookKey);
+                    localStorage.removeItem('parsed_pages_canvas_mode_' + bookKey);
                     fallbackToDefault();
                 }
             } else if (configuredUrl) {
@@ -1083,6 +1096,7 @@
             
             try {
                 const pdf = await pdfjsLib.getDocument(url).promise;
+                currentPdfDocument = pdf;
                 await parsePdfDocument(pdf, url.split('/').pop() || "Remote PDF");
             } catch (err) {
                 console.error("PDF Link Loading Error:", err);
@@ -1111,15 +1125,22 @@
                 }
             }
             
+            isCanvasMode = false;
             if (extractedPages.length === 0) {
-                throw new Error("No text content could be extracted.");
+                // Scanned PDF! Fallback to canvas mode
+                isCanvasMode = true;
+                for (let i = 1; i <= numPages; i++) {
+                    extractedPages.push(`[Scanned Page ${i}]`);
+                }
+                if (statusDiv) statusDiv.textContent = `ℹ️ Loaded scanned PDF (${numPages} pages) in Canvas/Image mode.`;
+            } else {
+                if (statusDiv) statusDiv.textContent = `✅ Successfully loaded book (${numPages} pages)!`;
             }
-            
-            if (statusDiv) statusDiv.textContent = `✅ Successfully loaded book (${numPages} pages)!`;
             
             try {
                 localStorage.setItem('parsed_pages_' + bookKey, JSON.stringify(extractedPages));
                 localStorage.setItem('parsed_pages_label_' + bookKey, sourceLabel);
+                localStorage.setItem('parsed_pages_canvas_mode_' + bookKey, isCanvasMode ? 'true' : 'false');
             } catch (e) {
                 console.warn("Storage quota exceeded:", e);
                 if (statusDiv) statusDiv.textContent += " (Note: Book is too large to cache, will need reload next time)";
@@ -1145,6 +1166,7 @@
                     try {
                         const typedarray = new Uint8Array(e.target.result);
                         const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                        currentPdfDocument = pdf;
                         await parsePdfDocument(pdf, file.name);
                     } catch (err) {
                         console.error("PDF Parsing Error:", err);
@@ -1215,6 +1237,7 @@
         function resetToDefaultSummary() {
             localStorage.removeItem('parsed_pages_' + bookKey);
             localStorage.removeItem('parsed_pages_label_' + bookKey);
+            localStorage.removeItem('parsed_pages_canvas_mode_' + bookKey);
             location.reload();
         }
 
@@ -1382,7 +1405,7 @@
         }
 
         // LOAD PAGE
-        function loadPage(pageIndex, startSentenceIndex = -1) {
+        async function loadPage(pageIndex, startSentenceIndex = -1) {
             if (pageIndex < 0 || pageIndex >= pages.length) return;
             
             stopAloud();
@@ -1393,15 +1416,72 @@
             document.getElementById('nextPageBtn').disabled = (currentPage === pages.length - 1);
             document.getElementById('pageIndicator').textContent = `Page ${currentPage + 1} of ${pages.length}`;
             
+            const contentBox = document.getElementById('bookContentText');
+            contentBox.innerHTML = "";
+            
+            if (isCanvasMode) {
+                // RENDER PDF PAGE TO CANVAS
+                const statusSpan = document.createElement('div');
+                statusSpan.style.textAlign = 'center';
+                statusSpan.style.padding = '20px';
+                statusSpan.style.color = '#8c7d70';
+                statusSpan.textContent = `⏳ Loading page ${currentPage + 1}...`;
+                contentBox.appendChild(statusSpan);
+                
+                try {
+                    if (!currentPdfDocument && serverPdfUrl) {
+                        currentPdfDocument = await pdfjsLib.getDocument(serverPdfUrl).promise;
+                    }
+                    
+                    if (currentPdfDocument) {
+                        const page = await currentPdfDocument.getPage(currentPage + 1);
+                        
+                        // Create canvas
+                        const canvas = document.createElement('canvas');
+                        canvas.style.display = 'block';
+                        canvas.style.margin = '0 auto';
+                        canvas.style.maxWidth = '100%';
+                        canvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                        canvas.style.borderRadius = '8px';
+                        
+                        const context = canvas.getContext('2d');
+                        
+                        // Calculate scale to fit page width nicely in the content box
+                        const containerWidth = contentBox.clientWidth || 800;
+                        const initialViewport = page.getViewport({ scale: 1.0 });
+                        const scale = (containerWidth - 40) / initialViewport.width;
+                        const viewport = page.getViewport({ scale: scale || 1.2 });
+                        
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        
+                        contentBox.innerHTML = "";
+                        contentBox.appendChild(canvas);
+                        
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        await page.render(renderContext).promise;
+                    } else {
+                        contentBox.innerHTML = `<div style="text-align: center; color: red; padding: 20px;">Error: PDF document is not loaded.</div>`;
+                    }
+                } catch (e) {
+                    console.error("Canvas render error:", e);
+                    contentBox.innerHTML = `<div style="text-align: center; color: red; padding: 20px;">Error loading page image: ${e.message}</div>`;
+                }
+                
+                // Save bookmark state to DB
+                saveBookmark(currentPage, 0);
+                return;
+            }
+
             // Parse sentences on this page
             const rawText = pages[currentPage];
             // Split by punctuation (sentences)
             sentences = rawText.match(/[^.!?]+[.!?]+(\s|$)/g) || [rawText];
             
             // Display page text wrapped in span tags for highlighting
-            const contentBox = document.getElementById('bookContentText');
-            contentBox.innerHTML = "";
-            
             sentences.forEach((sentence, idx) => {
                 const span = document.createElement('span');
                 span.className = 'sentence';
@@ -1607,6 +1687,10 @@
         }
 
         function togglePlayAloud() {
+            if (isCanvasMode) {
+                alert("Text-to-speech is disabled because this PDF does not contain a text layer.");
+                return;
+            }
             if (isPlaying) {
                 if (isPaused) {
                     // Resume
@@ -1686,6 +1770,10 @@
         // GEMINI AI ASSISTANT TRIGGERS
         function triggerAI(action) {
             const outputBox = document.getElementById('aiOutput');
+            if (isCanvasMode) {
+                outputBox.textContent = "⚠️ This book is loaded in image/canvas mode because it has no text layer. AI assistance features (Summarizing, Key Points, Explanation) are disabled for scanned PDFs.";
+                return;
+            }
             const pageText = pages[currentPage];
             let selection = window.getSelection().toString().trim();
             
@@ -1749,6 +1837,15 @@
             userMsg.textContent = query;
             chatContainer.appendChild(userMsg);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            if (isCanvasMode) {
+                const botError = document.createElement('div');
+                botError.className = "message bot";
+                botError.textContent = "⚠️ This book is loaded in image/canvas mode because it has no text layer. AI Q&A Chat is disabled for scanned PDFs.";
+                chatContainer.appendChild(botError);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                return;
+            }
             
             // Append Bot loader
             const botLoader = document.createElement('div');
