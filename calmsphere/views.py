@@ -66,26 +66,25 @@ def auth_page(request):
                 f.write(f"Registration OTP for {form.cleaned_data['email']}: {otp_code}\n")
             
             # Send Email
-            # Send Email
-subject = "CalmSphere - Verification Code"
-message = f"Hello {form.cleaned_data['fullname']},\n\nYour 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
+            subject = "CalmSphere - Verification Code"
+            message = f"Hello {form.cleaned_data['fullname']},\n\nYour 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [form.cleaned_data['email']],
+                )
+            except Exception as e:
+                print("EMAIL ERROR:", e)
+                messages.error(request, "Failed to send OTP. Please check your email configuration.")
+                return redirect("signup")
 
-try:
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [form.cleaned_data['email']],
-        fail_silently=False
-    )
-except Exception as e:
-    print("EMAIL ERROR:", e)
+            request.session['otp_verify_email'] = form.cleaned_data['email']
+            request.session['otp_purpose'] = 'register'
 
-request.session['otp_verify_email'] = form.cleaned_data['email']
-request.session['otp_purpose'] = 'register'
-
-messages.success(request, f"Verification OTP sent to {form.cleaned_data['email']}")
-return redirect("verify_otp")
+            messages.success(request, f"Verification OTP sent to {form.cleaned_data['email']}")
+            return redirect("verify_otp")
         else:
             # Show the first error
             for field, errors in form.errors.items():
@@ -1174,7 +1173,14 @@ def resend_otp(request):
     name = user.first_name if user else request.session.get('register_data', {}).get('fullname', 'User')
     subject = "CalmSphere - New Verification Code"
     message = f"Hello {name},\n\nYour new 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [target_email])
+    try:
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [target_email])
+    except Exception as e:
+        print("EMAIL ERROR:", e)
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unable to send OTP email.'
+            }, status=500)
 
     return JsonResponse({'status': 'success', 'message': 'OTP resent successfully.'})
 
