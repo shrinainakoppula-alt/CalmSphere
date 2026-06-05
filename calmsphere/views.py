@@ -39,54 +39,21 @@ def auth_page(request):
         }
         form = RegistrationForm(form_data)
         if form.is_valid():
-            # Generate secure 6 digit OTP
-            otp_code = f"{secrets.randbelow(900000) + 100000:06d}"
-            
-            # Save unverified registration data in session
-            request.session['register_data'] = {
-                'fullname': form.cleaned_data['fullname'],
-                'username': form.cleaned_data['username'],
-                'email': form.cleaned_data['email'],
-                'mobile': form.cleaned_data['mobile'],
-                'password_hash': make_password(form.cleaned_data['password']),
-            }
-            
-            # Save OTPVerification
-            expiry = now() + timedelta(minutes=5)
-            OTPVerification.objects.create(
+            new_user = User.objects.create_user(
+                username=form.cleaned_data['username'],
                 email=form.cleaned_data['email'],
-                otp_hash=make_password(otp_code),
-                purpose='register',
-                expires_at=expiry
+                password=form.cleaned_data['password']
             )
-            
-            # Write to debug log for local verification
-            import os
-            with open(os.path.join(settings.BASE_DIR, 'otp_debug.log'), 'a') as f:
-                f.write(f"Registration OTP for {form.cleaned_data['email']}: {otp_code}\n")
-            
-            # Send Email
-            subject = "CalmSphere - Verification Code"
-            message = f"Hello {form.cleaned_data['fullname']},\n\nYour 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
-            try:
-                print(f"EMAIL DEBUG: Trying to send email. Backend: {settings.EMAIL_BACKEND}, From: {settings.DEFAULT_FROM_EMAIL}, To: {form.cleaned_data['email']}")
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [form.cleaned_data['email']],
-                )
-                print("EMAIL DEBUG: Email sent successfully.")
-            except Exception as e:
-                print("EMAIL ERROR:", e)
-                messages.error(request, "Failed to send OTP. Please check your email configuration.")
-                return redirect("signup")
+            new_user.first_name = form.cleaned_data['fullname']
+            new_user.save()
 
-            request.session['otp_verify_email'] = form.cleaned_data['email']
-            request.session['otp_purpose'] = 'register'
-
-            messages.success(request, f"Verification OTP sent to {form.cleaned_data['email']}")
-            return redirect("verify_otp")
+            UserProfile.objects.create(user=new_user, mobile=form.cleaned_data['mobile'])
+            
+            login(request, new_user)
+            request.session["username"] = new_user.username
+            
+            messages.success(request, f"Welcome to CalmSphere, {new_user.first_name}!")
+            return redirect('mood')
         else:
             # Show the first error
             for field, errors in form.errors.items():
