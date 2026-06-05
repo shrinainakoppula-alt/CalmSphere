@@ -69,12 +69,14 @@ def auth_page(request):
             subject = "CalmSphere - Verification Code"
             message = f"Hello {form.cleaned_data['fullname']},\n\nYour 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
             try:
+                print(f"EMAIL DEBUG: Trying to send email. Backend: {settings.EMAIL_BACKEND}, From: {settings.DEFAULT_FROM_EMAIL}, To: {form.cleaned_data['email']}")
                 send_mail(
                     subject,
                     message,
                     settings.DEFAULT_FROM_EMAIL,
                     [form.cleaned_data['email']],
                 )
+                print("EMAIL DEBUG: Email sent successfully.")
             except Exception as e:
                 print("EMAIL ERROR:", e)
                 messages.error(request, "Failed to send OTP. Please check your email configuration.")
@@ -1174,7 +1176,9 @@ def resend_otp(request):
     subject = "CalmSphere - New Verification Code"
     message = f"Hello {name},\n\nYour new 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
     try:
+        print(f"EMAIL DEBUG: Trying to resend email. Backend: {settings.EMAIL_BACKEND}, From: {settings.DEFAULT_FROM_EMAIL}, To: {target_email}")
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [target_email])
+        print("EMAIL DEBUG: Resend email sent successfully.")
     except Exception as e:
         print("EMAIL ERROR:", e)
         return JsonResponse({
