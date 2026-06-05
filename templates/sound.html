@@ -166,12 +166,16 @@
             // hide color overlay
             overlay.style.display = "none";
 
-            video.src = "/static/videos/" + name + ".mp4";
+            if (name === "waves") {
+                video.src = "https://assets.mixkit.co/videos/preview/mixkit-sea-waves-approaching-the-golden-sand-on-a-beach-41584-large.mp4";
+            } else {
+                video.src = "/static/videos/" + name + ".mp4";
+            }
             video.load();
             video.play();
         }
     </script>
-
+    <script src="{% static 'js/global_notifications.js' %}"></script>
 </body>
 
 </html>

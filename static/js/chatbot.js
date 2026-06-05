@@ -110,14 +110,11 @@ async function sendMessage() {
 
         if (data && data.status === 'success' && data.response) {
             appendMessage(data.response, false);
-            // Optionally reload or dynamically append to sidebar if it was a brand new chat
-            // so the title updates dynamically. But let's check: if we just reload on first message,
-            // the sidebar will show the title. Let's do a simple check: if sidebar list has only
-            // "New Chat" or is empty, we can reload to show the first message title.
-            // Even better: just let the user see the chat, and when they refresh/navigate, it updates.
-            // Let's reload to update the sidebar title ONLY if the current active chat list item is "New Chat"
-            const activeItemText = document.querySelector('.chat-history-item.active .chat-history-title');
-            if (activeItemText && (activeItemText.textContent.trim() === 'New Chat' || activeItemText.textContent.trim() === '')) {
+            
+            // Reload the page if this was the very first user message in the session,
+            // so that the sidebar title updates from the greeting to the user's message.
+            const userMessages = document.querySelectorAll('.msg-bubble.user');
+            if (userMessages.length === 1) {
                 window.location.reload();
             }
         } else if (data && data.message) {

@@ -618,6 +618,7 @@ def chatbot_view(request):
     chats = (
         ChatMessage.objects.filter(user=request.user)
         .exclude(session_key=None)
+        .order_by()
         .values('session_key')
         .annotate(last_activity=Max('created_at'))
         .order_by('-last_activity')
