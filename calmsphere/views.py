@@ -66,15 +66,26 @@ def auth_page(request):
                 f.write(f"Registration OTP for {form.cleaned_data['email']}: {otp_code}\n")
             
             # Send Email
-            subject = "CalmSphere - Verification Code"
-            message = f"Hello {form.cleaned_data['fullname']},\n\nYour 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [form.cleaned_data['email']])
-            
-            request.session['otp_verify_email'] = form.cleaned_data['email']
-            request.session['otp_purpose'] = 'register'
-            
-            messages.success(request, f"Verification OTP sent to {form.cleaned_data['email']}")
-            return redirect("verify_otp")
+            # Send Email
+subject = "CalmSphere - Verification Code"
+message = f"Hello {form.cleaned_data['fullname']},\n\nYour 6-digit verification code is: {otp_code}\nThis code is valid for 5 minutes.\n\nStay calm,\nCalmSphere Team"
+
+try:
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [form.cleaned_data['email']],
+        fail_silently=False
+    )
+except Exception as e:
+    print("EMAIL ERROR:", e)
+
+request.session['otp_verify_email'] = form.cleaned_data['email']
+request.session['otp_purpose'] = 'register'
+
+messages.success(request, f"Verification OTP sent to {form.cleaned_data['email']}")
+return redirect("verify_otp")
         else:
             # Show the first error
             for field, errors in form.errors.items():
