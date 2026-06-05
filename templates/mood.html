@@ -212,6 +212,16 @@
             </a>
         </div>
     </nav>
+    {% if messages %}
+    <div class="container mt-2">
+        {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="border-radius: 15px; border: 1px solid rgba(181, 145, 101, 0.2); background-color: #fff6eb; color: #7a5235; max-width: 600px; margin: 0 auto 20px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="page-shell">
         <div class="container py-5">
             <div class="page-header">
