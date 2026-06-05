@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal</title>
+    <link rel="stylesheet" href="{% static 'css/journal.css' %}">
+</head>
+<body>
+    <div class="journal-shell">
+        <header class="journal-header">
+            <a href="{% url 'dashboard' %}" class="back-link">← Back</a>
+            <div class="page-title">
+                <p class="section-label">Today</p>
+                <h1>How are you feeling today?</h1>
+            </div>
+            <div class="session-meta">
+                <span class="session-time">{% now "F j, Y · g:i A" %}</span>
+                <div class="mode-control">
+                    <select id="themeSelect" class="session-pill" aria-label="Select theme mode">
+                        <option value="night">Night Mode</option>
+                        <option value="morning">Morning Mode</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <div class="journal-grid">
+            <aside class="sidebar panel">
+                <div class="sidebar-header">
+                    <h2>Your Entries</h2>
+                    <a href="?page=1" class="view-all">View All Entries</a>
+                </div>
+                <div class="search-box">
+                    <input type="search" placeholder="Search entries..." aria-label="Search entries">
+                </div>
+                <div class="entries-list">
+                    {% if entries %}
+                        {% for item in entries %}
+                            <a href="?page={{ page_number }}&date={{ item.date|date:'Y-m-d' }}" class="entry-item{% if entry and item.date == entry.date %} active{% endif %}">
+                                <span class="entry-date">{{ item.date|date:"M d, Y" }}</span>
+                                <p>{{ item.content|truncatechars:42 }}</p>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <p>No journal entries yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="entry-slider">
+                    <div class="slider-heading">
+                        <h3>Mood Logs</h3>
+                        <span class="slider-meta">Swipe through your recent reflections</span>
+                    </div>
+                    <div class="slider-track">
+                        {% for item in entries %}
+                            <article class="slider-card{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}">
+                                <div class="slider-card-top">
+                                    <span class="slider-date">{{ item.date|date:"M d, Y" }}</span>
+                                    <span class="slider-badge">Mood</span>
+                                </div>
+                                <p class="slider-preview">{{ item.content|truncatechars:120 }}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                    {% if entries|length > 1 %}
+                        <div class="slider-controls">
+                            <button type="button" class="slide-btn prev-btn">← Previous</button>
+                            <button type="button" class="slide-btn next-btn">Next →</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </aside>
+
+            <main class="main-panel panel">
+                <section class="write-card">
+                    <div class="write-card-header">
+                        <div>
+                            <span class="tag-label">Entry</span>
+                            <span class="page-label">Page {{ page_number }}</span>
+                            {% if latest_mood_display %}
+                                <span class="mood-badge-info" style="margin-left: 15px; padding: 6px 12px; border-radius: 20px; background: rgba(255, 255, 255, 0.1); font-size: 0.85rem; color: #dfe2ff;">
+                                    Mood: {{ latest_mood_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="date-group">
+                            <label for="dateInput">Date</label>
+                            <input id="dateInput" type="date" name="date" form="journalForm" value="{{ selected_date }}">
+                        </div>
+                    </div>
+
+                    <form method="POST" id="journalForm" class="journal-form">
+                        {% csrf_token %}
+                        <textarea id="journalText" name="content" placeholder="{{ default_prompt }}">{{ entry.content|default:default_prompt }}</textarea>
+                        <div class="tags-row">
+                            <span class="tag-pill">#stress</span>
+                            <span class="tag-pill">#gratitude</span>
+                            <span class="tag-pill">#personal</span>
+                            <button type="button" class="add-tag">+</button>
+                        </div>
+                        <div class="action-row">
+                            <button type="button" class="ai-button">AI Reflection</button>
+                            <button type="submit" class="save-button">Save Entry</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="motivational-panel panel">
+                    <h3>Every day is a new beginning.</h3>
+                    <p>Take a deep breath and start again.</p>
+                </section>
+            </main>
+
+            <aside class="sidebar-right panel">
+                <section class="insights-card">
+                    <div class="card-heading">
+                        <div class="insights-title">
+                            <span class="ai-icon">🤖</span>
+                            <h2>AI Insights</h2>
+                        </div>
+                    </div>
+                    <p>You seem to be in a calm and balanced state today. Keep nurturing these positive emotions!</p>
+                </section>
+
+                <section class="overview-card">
+                    <div class="card-heading">
+                        <h2>Mood Overview</h2>
+                        <span class="small-label">This Week</span>
+                    </div>
+                    <div class="mood-chart">
+                        <svg viewBox="0 0 320 120" class="mood-line-chart" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#a98cff" stop-opacity="0.9" />
+                                    <stop offset="100%" stop-color="#3e50f5" stop-opacity="0.15" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 90 C 44 78 68 72 92 72 S 140 78 164 64 S 212 76 236 54 S 284 38 308 36" fill="none" stroke="#c8ceff" stroke-width="3" stroke-linecap="round" />
+                            <path d="M 20 90 C 44 78 68 72 92 72 S 140 78 164 64 S 212 76 236 54 S 284 38 308 36" fill="url(#chartGradient)" opacity="0.55" stroke="none" />
+                            <circle cx="20" cy="90" r="6" fill="#a98cff" />
+                            <circle cx="68" cy="72" r="6" fill="#a98cff" />
+                            <circle cx="116" cy="58" r="6" fill="#a98cff" />
+                            <circle cx="164" cy="64" r="6" fill="#a98cff" />
+                            <circle cx="212" cy="76" r="6" fill="#a98cff" />
+                            <circle cx="260" cy="54" r="6" fill="#a98cff" />
+                            <circle cx="308" cy="36" r="6" fill="#a98cff" />
+                        </svg>
+                        <div class="chart-labels">
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="stats-card">
+                    <div class="card-heading">
+                        <h2>Journal Stats</h2>
+                    </div>
+                    <div class="stat-row"><span>Total Entries</span><strong>{{ total_entries }}</strong></div>
+                    <div class="stat-row"><span>This Month</span><strong>{{ monthly_entries }}</strong></div>
+                    <div class="stat-row"><span>Longest Streak</span><strong>{{ longest_streak }} days</strong></div>
+                    <div class="stat-row"><span>Avg. Mood</span><strong>{{ average_mood }}</strong></div>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        const sliderCards = document.querySelectorAll('.slider-card');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        let activeSlide = 0;
+
+        function setSlide(index) {
+            if (!sliderCards.length) return;
+            if (index < 0) index = sliderCards.length - 1;
+            if (index >= sliderCards.length) index = 0;
+            activeSlide = index;
+            sliderCards.forEach(card => card.classList.remove('active'));
+            sliderCards[activeSlide].classList.add('active');
+        }
+
+        if (sliderCards.length) {
+            setSlide(0);
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => setSlide(activeSlide - 1));
+            }
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => setSlide(activeSlide + 1));
+            }
+        }
+        // Theme selector: persist and apply morning/night themes
+        (function() {
+            const select = document.getElementById('themeSelect');
+            const applyTheme = (mode) => {
+                document.body.classList.remove('theme-morning','theme-night');
+                document.body.classList.add(mode === 'morning' ? 'theme-morning' : 'theme-night');
+            };
+
+            // Initialize from localStorage or default to night
+            const saved = localStorage.getItem('calm_theme') || 'night';
+            if (select) {
+                select.value = saved;
+                applyTheme(saved);
+                select.addEventListener('change', (e) => {
+                    const val = e.target.value;
+                    localStorage.setItem('calm_theme', val);
+                    applyTheme(val);
+                });
+            } else {
+                applyTheme(saved);
+            }
+        })();
+    </script>
+</body>
+</html>

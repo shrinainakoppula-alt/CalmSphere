@@ -1,0 +1,749 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalmSphere - Reading Therapy Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f6f3ef;
+            --text-color: #3e352c;
+            --accent-color: #bf8b58;
+            --accent-hover: #a67343;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --card-shadow: 0 10px 30px rgba(191, 139, 88, 0.06);
+            --glass-shadow: 0 12px 40px rgba(79, 63, 47, 0.05);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f7f4f0 0%, #ede6dd 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* HEADER */
+        header {
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0 15px;
+            position: relative;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .logo-text .calm-text {
+            color: #c58a57;
+        }
+
+        .logo-text .sphere-text {
+            color: #7a5235;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* MAIN CONTAINER */
+        .main-container {
+            width: 90%;
+            max-width: 1200px;
+            padding-bottom: 80px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #3f2f20;
+            margin: 20px 0 35px;
+            text-align: center;
+        }
+
+        /* ANALYTICS PANEL */
+        .analytics-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 28px;
+            padding: 30px;
+            margin-bottom: 45px;
+        }
+
+        .analytics-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #554433;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #4f3621;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #8c7d70;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* BOOK SECTIONS */
+        .section-header {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #3f2f20;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* BOOK GRID */
+        .book-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 850px) {
+            .book-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .book-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .book-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            gap: 24px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(191, 139, 88, 0.12);
+            border-color: rgba(191, 139, 88, 0.25);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .book-img-wrapper {
+            flex-shrink: 0;
+            width: 130px;
+            height: 185px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(79, 63, 47, 0.15);
+            position: relative;
+            background: #e5dec9;
+        }
+
+        .book-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .book-card:hover .book-img {
+            transform: scale(1.06);
+        }
+
+        .book-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+
+        .book-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #332211;
+            margin: 0 0 8px 0;
+            line-height: 1.3;
+        }
+
+        .book-desc {
+            font-size: 0.92rem;
+            color: #6a5e53;
+            line-height: 1.5;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* PROGRESS BAR */
+        .progress-section {
+            margin-top: 15px;
+        }
+
+        .progress-bar-wrapper {
+            background: rgba(191, 139, 88, 0.12);
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 6px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #bf8b58, #dfab78);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease-in-out;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .progress-status {
+            color: #8c7d70;
+            font-weight: 500;
+        }
+
+        .read-pill {
+            align-self: flex-start;
+            background: rgba(191, 139, 88, 0.1);
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        /* PDF Config Button and Badge Styles */
+        .book-img-wrapper {
+            position: relative;
+        }
+
+        .config-pdf-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .config-pdf-btn:hover {
+            background: #bf8b58;
+            color: white;
+            border-color: #bf8b58;
+            transform: scale(1.1);
+        }
+
+        body.theme-dark .config-pdf-btn {
+            background: rgba(26, 22, 19, 0.9);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ede2d7;
+        }
+
+        .pdf-badge {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: #558833;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            text-align: left;
+        }
+
+        body.theme-dark .modal-card {
+            background: #1d1a18;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ede2d7;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-card h3 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: #3e342c;
+        }
+
+        body.theme-dark .modal-card h3 {
+            color: #ede2d7;
+        }
+
+        .modal-card p {
+            font-size: 0.9rem;
+            color: #6a5e53;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        body.theme-dark .modal-card p {
+            color: #bfaea0;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            margin-bottom: 20px;
+            background: #fff;
+            color: #3e342c;
+        }
+
+        body.theme-dark .modal-input {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ede2d7;
+        }
+
+        .modal-btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex-grow: 1;
+            background: #bf8b58;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .modal-btn:hover {
+            background: #a67343;
+        }
+
+        .modal-btn.btn-outline {
+            background: none;
+            border: 1px solid rgba(191, 139, 88, 0.4);
+            color: #bf8b58;
+        }
+
+        .modal-btn.btn-outline:hover {
+            background: rgba(191, 139, 88, 0.05);
+        }
+
+        .modal-reset-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #c94b4b;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            text-align: center;
+        }
+
+        .modal-reset-btn:hover {
+            color: #b33939;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a class="logo-text" href="{% url 'dashboard' %}">
+            <span class="calm-text">Calm</span><span class="sphere-text">Sphere</span>
+        </a>
+        <a href="{% url 'dashboard' %}" class="back-btn">
+            <span>←</span> Back to Dashboard
+        </a>
+    </header>
+
+    <div class="main-container">
+        <h1>📚 Reading Therapy</h1>
+
+        <!-- STATS DASHBOARD -->
+        <div class="analytics-container">
+            <div class="analytics-title">
+                <span>📊</span> Your Mindful Reading Analytics
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-value">{{ analytics.reading_streak }}</div>
+                    <div class="stat-label">Daily Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📖</div>
+                    <div class="stat-value" id="read-time-val">0</div>
+                    <div class="stat-label">Reading Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎧</div>
+                    <div class="stat-value" id="listen-time-val">0</div>
+                    <div class="stat-label">Listening Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-value">{{ analytics.pages_completed }}</div>
+                    <div class="stat-label">Pages Read</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-value">{{ analytics.books_completed }}</div>
+                    <div class="stat-label">Books Completed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <span>🧘</span> Mindful Classics Library
+        </div>
+
+        <!-- BOOKS GRID -->
+        <div class="book-grid">
+
+            <!-- ATOMIC HABITS -->
+            <a href="{% url 'book_atomic' %}" class="book-link">
+                <div class="book-card">
+                    <div class="book-img-wrapper">
+                        <img src="{% static 'books/atomic.jpg' %}" class="book-img" alt="Atomic Habits">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-meta">
+                            <h2 class="book-title">Atomic Habits</h2>
+                            <p class="book-desc">Build small habits that create big life changes. Learn how tiny daily improvements can transform your life.</p>
+                        </div>
+                        <div class="progress-section">
+                            {% if progress_dict.atomic %}
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill" style="width: {{ progress_dict.atomic.percentage_completed }}%"></div>
+                            </div>
+                            <div class="progress-meta">
+                                <span>{{ progress_dict.atomic.percentage_completed }}% complete</span>
+                                <span class="progress-status">Resume Page {{ progress_dict.atomic.current_page|add:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <div class="read-pill">Start Reading</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- POWER OF NOW -->
+            <a href="{% url 'book_power_now' %}" class="book-link">
+                <div class="book-card">
+                    <div class="book-img-wrapper">
+                        <img src="{% static 'books/power.jpg' %}" class="book-img" alt="The Power of Now">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-meta">
+                            <h2 class="book-title">The Power of Now</h2>
+                            <p class="book-desc">Learn to live in the present moment and free yourself from stress, anxiety, and overthinking.</p>
+                        </div>
+                        <div class="progress-section">
+                            {% if progress_dict.power_now %}
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill" style="width: {{ progress_dict.power_now.percentage_completed }}%"></div>
+                            </div>
+                            <div class="progress-meta">
+                                <span>{{ progress_dict.power_now.percentage_completed }}% complete</span>
+                                <span class="progress-status">Resume Page {{ progress_dict.power_now.current_page|add:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <div class="read-pill">Start Reading</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- YOU CAN WIN -->
+            <a href="{% url 'book_you_can_win' %}" class="book-link">
+                <div class="book-card">
+                    <div class="book-img-wrapper">
+                        <img src="{% static 'books/win.jpg' %}" class="book-img" alt="You Can Win">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-meta">
+                            <h2 class="book-title">You Can Win</h2>
+                            <p class="book-desc">Develop a positive mindset, confidence, and the habits needed to succeed in life.</p>
+                        </div>
+                        <div class="progress-section">
+                            {% if progress_dict.you_can_win %}
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill" style="width: {{ progress_dict.you_can_win.percentage_completed }}%"></div>
+                            </div>
+                            <div class="progress-meta">
+                                <span>{{ progress_dict.you_can_win.percentage_completed }}% complete</span>
+                                <span class="progress-status">Resume Page {{ progress_dict.you_can_win.current_page|add:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <div class="read-pill">Start Reading</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- HEAL YOUR LIFE -->
+            <a href="{% url 'book_heal_life' %}" class="book-link">
+                <div class="book-card">
+                    <div class="book-img-wrapper">
+                        <img src="{% static 'books/heal.jpg' %}" class="book-img" alt="You Can Heal Your Life">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-meta">
+                            <h2 class="book-title">You Can Heal Your Life</h2>
+                            <p class="book-desc">Understand how your thoughts shape your life and learn techniques to heal emotionally and mentally.</p>
+                        </div>
+                        <div class="progress-section">
+                            {% if progress_dict.heal_life %}
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill" style="width: {{ progress_dict.heal_life.percentage_completed }}%"></div>
+                            </div>
+                            <div class="progress-meta">
+                                <span>{{ progress_dict.heal_life.percentage_completed }}% complete</span>
+                                <span class="progress-status">Resume Page {{ progress_dict.heal_life.current_page|add:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <div class="read-pill">Start Reading</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- OVERTHINKING -->
+            <a href="{% url 'book_overthinking' %}" class="book-link">
+                <div class="book-card">
+                    <div class="book-img-wrapper">
+                        <img src="{% static 'books/overthinking.jpg' %}" class="book-img" alt="Overthinking Cure">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-meta">
+                            <h2 class="book-title">Overthinking Cure</h2>
+                            <p class="book-desc">Break free from constant worrying and learn how to calm your mind and reduce unnecessary stress.</p>
+                        </div>
+                        <div class="progress-section">
+                            {% if progress_dict.overthinking %}
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill" style="width: {{ progress_dict.overthinking.percentage_completed }}%"></div>
+                            </div>
+                            <div class="progress-meta">
+                                <span>{{ progress_dict.overthinking.percentage_completed }}% complete</span>
+                                <span class="progress-status">Resume Page {{ progress_dict.overthinking.current_page|add:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <div class="read-pill">Start Reading</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- MINDFULNESS -->
+            <a href="{% url 'book_mindfulness' %}" class="book-link">
+                <div class="book-card">
+                    <div class="book-img-wrapper">
+                        <img src="{% static 'books/mindfulness.jpg' %}" class="book-img" alt="Mindfulness in Plain English">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-meta">
+                            <h2 class="book-title">Mindfulness in Plain English</h2>
+                            <p class="book-desc">A simple and practical guide to meditation, awareness, and living a peaceful life.</p>
+                        </div>
+                        <div class="progress-section">
+                            {% if progress_dict.mindfulness %}
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill" style="width: {{ progress_dict.mindfulness.percentage_completed }}%"></div>
+                            </div>
+                            <div class="progress-meta">
+                                <span>{{ progress_dict.mindfulness.percentage_completed }}% complete</span>
+                                <span class="progress-status">Resume Page {{ progress_dict.mindfulness.current_page|add:"1" }}</span>
+                            </div>
+                            {% else %}
+                            <div class="read-pill">Start Reading</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+        // Convert seconds to human readable string (e.g. 5m 12s or 32s)
+        function formatDuration(sec) {
+            if (!sec || sec <= 0) return "0 min";
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            if (m > 0) {
+                return `${m}m ${s}s`;
+            }
+            return `${s}s`;
+        }
+
+        // Bind durations
+        document.addEventListener('DOMContentLoaded', () => {
+            const rawReadTime = parseInt("{{ analytics.total_reading_time|default:0 }}");
+            const rawListenTime = parseInt("{{ analytics.total_listening_time|default:0 }}");
+            document.getElementById('read-time-val').textContent = formatDuration(rawReadTime);
+            document.getElementById('listen-time-val').textContent = formatDuration(rawListenTime);
+        });
+    </script>
+</body>
+</html>

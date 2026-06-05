@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CalmSphere</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Cormorant+Garamond:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg custom-navbar">
+        <div class="container-fluid px-5">
+
+            <!-- Logo -->
+            <a class="navbar-brand logo-text" href="#">
+                <span class="calm-text">Calm</span><span class="sphere-text">Sphere</span>
+            </a>
+
+            <!-- Right Side -->
+            <div class="nav-links d-flex align-items-center gap-4">
+
+                <a href="#about-section" class="nav-item-custom">
+                    About Us
+                </a>
+
+                <a href="{% url 'login' %}" class="nav-item-custom">
+                    Login
+                </a>
+
+                <a href="{% url 'signup' %}" class="signup-btn">
+                    Sign Up
+                </a>
+
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+
+        <video autoplay muted loop playsinline class="bg-video">
+            <source src="{% static 'videos/hero-bg.mp4' %}" type="video/mp4">
+        </video>
+
+    </section>
+    <!-- ABOUT US SECTION -->
+
+    <section id="about-section" class="about-section">
+
+        <div class="container">
+
+            <div class="row align-items-center">
+
+                <!-- LEFT CONTENT -->
+                <div class="col-lg-6">
+
+                    <h1 class="about-title">
+                        About CalmSphere
+                    </h1>
+
+                    <p class="about-text">
+                        CalmSphere is a peaceful digital space designed to help users
+                        relax, meditate, track moods, and improve mental wellness
+                        through calming experiences and mindfulness activities.
+                    </p>
+
+                    <p class="about-text">
+                        Our mission is to create a soothing environment where people
+                        can escape stress, build positivity, and focus on emotional
+                        balance in their daily lives.
+                    </p>
+
+                </div>
+
+                <!-- RIGHT IMAGE -->
+                <div class="col-lg-6 text-center">
+
+                    <img src="{% static 'assets/about-image.png' %}" class="about-image" alt="About CalmSphere">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

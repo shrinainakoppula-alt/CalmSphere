@@ -1,0 +1,62 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Om Meditation</title>
+    <link rel="stylesheet" href="{% static 'css/om.css' %}">
+</head>
+<body>
+
+<div id="omBackground"></div>
+<video autoplay muted loop id="bgVideo">
+    <source src="{% static 'videos/om.mp4' %}" type="video/mp4">
+</video>
+
+<div class="overlay">
+    <header class="top-bar">
+        <div class="page-pill">
+            <span class="pill-icon">🕉</span>
+            Om Meditation
+        </div>
+        <div class="timer-card">
+            <div class="timer" id="timer">05:00</div>
+            <div class="timer-label"><span></span>TIME REMAINING<span></span></div>
+        </div>
+        <button class="page-pill chant-btn">
+            <span class="pill-icon">🎵</span>
+            Chant On
+        </button>
+    </header>
+
+    <div class="duration-options">
+        <label for="durationInput" class="duration-label">Session length (minutes)</label>
+        <input id="durationInput" class="duration-input" type="number" min="1" max="60" value="5">
+    </div>
+
+    <button class="page-pill chant-btn">
+    <span class="pill-icon">🎵</span>
+    Let the Divine Sound Guide You
+</button>
+
+    <div class="controls">
+        <div class="control-btn">
+            <button id="pauseBtn" class="small-btn">⏸</button>
+            <span>Pause</span>
+        </div>
+        <div class="control-btn">
+            <button id="startBtn" class="play-btn">▶</button>
+            <span>Start</span>
+        </div>
+        <div class="control-btn">
+            <button id="resetBtn" class="small-btn">↻</button>
+            <span>Reset</span>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/om.js' %}"></script>
+
+</body>
+</html>

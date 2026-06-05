@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meditation - CalmSphere</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f7f4f1, #f5f5f5);
+        }
+
+        header {
+            text-align: center;
+            padding: 30px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: #e3f2fd;
+        }
+
+        .emoji {
+            font-size: 30px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 20px 30px 0;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #f7f4f1;
+            color: #2c3e50;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn:hover {
+            background: #dceefb;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="top-bar">
+    <a href="{% url 'dashboard' %}" class="back-btn">← Back</a>
+</div>
+
+<header>
+    🧘 Meditation
+</header>
+
+<div class="container">
+    <a href="{% url 'breathe' %}" class="card">
+        <span class="emoji">🌬️</span>
+        Guided Breathing
+    </a>
+
+    <a href="{% url 'om' %}" class="card">
+        <span class="emoji">🕉️</span>
+        Om Meditation
+    </a>
+
+    <a href="{% url 'bodyscan' %}" class="card">
+        <span class="emoji">🧘</span>
+        Body 
+    </a>
+
+    <a href="{% url 'gratitude' %}" class="card">
+        <span class="emoji">❤️</span>
+        Gratitude
+    </a>
+</div>
+
+</body>
+</html>

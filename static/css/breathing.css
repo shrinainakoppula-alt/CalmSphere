@@ -1,0 +1,277 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --main-bg-color: #fffaf7;
+}
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background: linear-gradient(
+        to bottom,
+        #fff9f2 0%,
+        #fff1e0 40%,
+        #ffe7d0 70%,
+        #f5fbff 100%
+    );
+
+    overflow:hidden;
+    font-family:'Poppins',sans-serif;
+}
+#particles{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    z-index:-1;
+}
+
+.particle{
+    position:absolute;
+    border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,236,179,0.95), rgba(255,196,129,0.6));
+    opacity:0.7;
+    filter:blur(0.6px);
+    box-shadow: 0 0 10px rgba(255,190,120,0.25);
+    animation: floatUp linear infinite;
+}
+
+@keyframes floatUp{
+    from{
+        transform:translateY(100vh);
+        opacity:0;
+    }
+
+    20%{
+        opacity:1;
+    }
+
+    80%{
+        opacity:1;
+    }
+
+    to{
+        transform:translateY(-100px);
+        opacity:0;
+    }
+}
+
+.meditation-container{
+    text-align:center;
+    color:#24303a;
+}
+
+.timer{
+    font-size:2rem;
+    margin-bottom:20px;
+    opacity:0.9;
+}
+
+#phase{
+    margin-bottom:40px;
+    font-size:2.2rem;
+}
+
+.orb-container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.orb{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+
+    background:
+    radial-gradient(
+        circle at 40% 35%,
+        #fff7d6 0%,
+        #ffe6a8 30%,
+        #ffc07a 60%,
+        #ffb36a 100%
+    );
+
+    box-shadow:
+        0 0 30px rgba(255,195,110,0.45),
+        0 0 60px rgba(255,175,85,0.25);
+
+    transition:all 4s ease-in-out;
+}
+
+.expand{
+    transform:scale(1.4);
+}
+
+.quote{
+    margin-top:40px;
+    font-size:1.1rem;
+    opacity:0.8;
+}
+
+.controls{
+    margin-top:40px;
+}
+
+.controls button{
+    padding:12px 25px;
+    border:none;
+    border-radius:30px;
+    margin:0 10px;
+    cursor:pointer;
+    font-size:16px;
+    transition:0.3s;
+}
+
+#startBtn{
+    background:#22c55e;
+    color:white;
+}
+
+#pauseBtn{
+    background:#f59e0b;
+    color:white;
+}
+
+#resetBtn{
+    background:#ef4444;
+    color:white;
+}
+
+.controls button:hover{
+    transform:translateY(-3px);
+}
+
+.completion-modal{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(10,20,15,0.06);
+
+    display:none;
+    justify-content:center;
+    align-items:center;
+
+    z-index:999;
+}
+
+.completion-card{
+    background:rgba(255,255,255,0.95);
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    max-width:400px;
+
+    box-shadow:0 10px 30px rgba(37,50,59,0.08);
+}
+
+.completion-card h2{
+    color:#24303a;
+}
+
+.completion-card p{
+    color:#475569;
+}
+
+.completion-card button{
+    margin-top:15px;
+    padding:10px 20px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.duration-selector{
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+.duration-label{
+    display:block;
+    margin-bottom:10px;
+    font-weight:600;
+    color:#24303a;
+}
+
+.duration-input{
+    width:120px;
+    padding:12px 14px;
+    border-radius:18px;
+    border:1px solid rgba(36,48,58,0.16);
+    font-size:1rem;
+    text-align:center;
+}
+
+.duration-btn{
+    padding:10px 20px;
+    margin:0 8px;
+
+    border:none;
+    border-radius:25px;
+
+    background:rgba(36,48,58,0.06);
+    color:#24303a;
+
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.duration-btn:hover{
+    transform:translateY(-3px);
+    background:rgba(36,48,58,0.12);
+}
+
+.orb-wrapper{
+    position:relative;
+    width:280px;
+    height:280px;
+    margin:auto;
+}
+
+.progress-ring{
+    position:absolute;
+    top:0;
+    left:0;
+    transform:rotate(-90deg);
+}
+
+.progress-bg{
+    fill:none;
+    stroke:rgba(255,255,255,0.15);
+    stroke-width:8;
+}
+
+.progress-circle{
+    fill:none;
+    stroke:#ffb86b;
+    stroke-width:8;
+
+    stroke-linecap:round;
+
+    stroke-dasharray:754;
+    stroke-dashoffset:754;
+
+    transition:stroke-dashoffset 1s linear;
+}
+
+.orb{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    width:220px;
+    height:220px;
+}

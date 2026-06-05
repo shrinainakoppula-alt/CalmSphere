@@ -1,0 +1,830 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Theme-driven properties */
+    background: var(--cs-bg, #081223);
+    color: var(--cs-text, #eef0ff);
+}
+
+/* Night theme (default) */
+.theme-night {
+    --cs-bg: radial-gradient(circle at top left, rgba(85, 62, 255, 0.24), transparent 28%),
+              linear-gradient(180deg, #081223 0%, #0f1536 32%, #141a43 100%);
+    --cs-text: #eef0ff;
+}
+
+/* Morning theme (light/brown) */
+.theme-morning {
+    --cs-bg: #f7f4f1;
+    --cs-text: #3e2e25;
+}
+
+
+.journal-shell {
+    width: min(1280px, 100%);
+    margin: 28px auto 40px;
+    padding: 0 24px;
+}
+
+.journal-header {
+    display: grid;
+    grid-template-columns: minmax(170px, auto) 1fr minmax(180px, auto);
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #c7cdfd;
+    border-radius: 16px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.page-title .section-label {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(196, 206, 255, 0.72);
+}
+
+.page-title h1 {
+    margin: 0;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.05;
+    color: #f9fbff;
+}
+
+.session-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.session-time {
+    color: rgba(216, 226, 255, 0.82);
+    font-size: 0.95rem;
+}
+
+.session-pill {
+    border-radius: 999px;
+    padding: 11px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.journal-grid {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1.1fr) 320px;
+    gap: 22px;
+}
+
+.panel {
+    background: rgba(10, 12, 37, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.18);
+    padding: 24px;
+}
+
+/* Morning panel overrides */
+.theme-morning .panel {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+    color: #3e2e25;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sidebar-header,
+.card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.sidebar-header h2,
+.card-heading h2 {
+    margin: 0;
+    font-size: 1.02rem;
+    color: #f6f7ff;
+}
+
+.view-all,
+.small-label {
+    color: rgba(168, 189, 255, 0.82);
+    font-size: 0.92rem;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #e8ecff;
+    outline: none;
+}
+
+.search-box input::placeholder {
+    color: rgba(236, 239, 255, 0.46);
+}
+
+.entries-list {
+    display: grid;
+    gap: 14px;
+}
+
+.entry-item {
+    display: block;
+    padding: 18px 16px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.entry-item:hover,
+.entry-item.active {
+    transform: translateY(-1px);
+    border-color: rgba(128, 103, 255, 0.32);
+    background: rgba(113, 92, 255, 0.16);
+}
+
+/* Morning entry overrides */
+.theme-morning .entry-item {
+    background: #fff;
+    border-color: rgba(0,0,0,0.04);
+}
+.theme-morning .entry-item:hover,
+.theme-morning .entry-item.active {
+    background: #fbf7f3;
+    border-color: rgba(122,82,53,0.12);
+}
+
+.entry-date {
+    display: block;
+    margin-bottom: 8px;
+    color: rgba(193, 204, 255, 0.82);
+    font-size: 0.84rem;
+}
+
+.entry-item p {
+    margin: 0;
+    color: #edf0ff;
+    line-height: 1.55;
+}
+
+.empty-state {
+    padding: 26px 20px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(216, 226, 255, 0.72);
+    text-align: center;
+}
+
+.entry-slider {
+    margin-top: 28px;
+    padding: 20px;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.slider-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.slider-heading h3 {
+    margin: 0;
+    color: #f8f9ff;
+    font-size: 1rem;
+}
+
+.slider-meta {
+    color: rgba(197, 207, 255, 0.72);
+    font-size: 0.92rem;
+}
+
+.slider-track {
+    position: relative;
+    min-height: 170px;
+}
+
+.slider-card {
+    position: absolute;
+    inset: 0;
+    display: none;
+    padding: 20px;
+    border-radius: 22px;
+    background: rgba(32, 28, 59, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.slider-card.active {
+    display: block;
+}
+
+.slider-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.slider-date {
+    color: rgba(212, 221, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.slider-badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(116, 86, 255, 0.18);
+    color: #dde2ff;
+    font-size: 0.8rem;
+}
+
+.slider-preview {
+    margin: 0;
+    color: rgba(234, 239, 255, 0.92);
+    line-height: 1.75;
+    max-width: 100%;
+}
+
+.slider-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.slide-btn {
+    width: 100%;
+    max-width: 160px;
+    border: none;
+    border-radius: 18px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #f3f5ff;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.slide-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.main-panel {
+    display: grid;
+    gap: 20px;
+}
+
+.mood-selector {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mood-chip {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #f6f7ff;
+    padding: 16px 18px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    min-height: 56px;
+}
+
+.mood-chip:hover,
+.mood-chip.active {
+    background: rgba(117, 92, 255, 0.18);
+    border-color: rgba(138, 120, 255, 0.32);
+    transform: translateY(-1px);
+}
+
+.write-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px;
+    padding: 28px;
+}
+
+.write-card-header,
+.date-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.tag-label {
+    color: #bfc7ff;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.82rem;
+}
+
+.page-label {
+    color: rgba(202, 212, 255, 0.82);
+    font-size: 0.92rem;
+}
+
+.date-group label {
+    display: block;
+    color: rgba(190, 201, 255, 0.82);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.date-group input {
+    width: 170px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #eef0ff;
+}
+
+.journal-form {
+    display: grid;
+    gap: 18px;
+}
+
+#journalText {
+    min-height: 360px;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 24px;
+    background: rgba(16, 17, 45, 0.96);
+    color: #eef0ff;
+    font-size: 1rem;
+    line-height: 1.75;
+    resize: vertical;
+    outline: none;
+}
+
+/* Morning textarea override */
+.theme-morning #journalText {
+    background: #fff;
+    color: #3e2e25;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+#journalText::placeholder {
+    color: rgba(236, 238, 255, 0.46);
+}
+
+.tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.tag-pill,
+.add-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tag-pill {
+    background: rgba(255, 255, 255, 0.05);
+    color: #dfe2ff;
+}
+
+.add-tag {
+    background: rgba(120, 88, 255, 0.16);
+    color: #f8f9ff;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+}
+
+.action-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.ai-button,
+.save-button {
+    border: none;
+    border-radius: 18px;
+    padding: 16px 24px;
+    cursor: pointer;
+}
+
+.ai-button {
+    background: rgba(255, 255, 255, 0.08);
+    color: #dee2ff;
+}
+
+.save-button {
+    background: linear-gradient(135deg, #7563ff, #4655ff);
+    color: #fff;
+    min-width: 160px;
+}
+
+.motivational-panel {
+    padding: 30px;
+    background: linear-gradient(180deg, rgba(99, 84, 255, 0.18), rgba(14, 19, 64, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+}
+
+.motivational-panel h3 {
+    margin: 0 0 10px;
+    font-size: 1.28rem;
+    color: #f8f9ff;
+}
+
+.motivational-panel p {
+    margin: 0;
+    color: rgba(226, 232, 255, 0.78);
+    line-height: 1.8;
+}
+
+.sidebar-right {
+    display: grid;
+    gap: 20px;
+}
+
+.insights-card,
+.overview-card,
+.stats-card {
+    display: grid;
+    gap: 16px;
+}
+
+.insights-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.ai-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: rgba(136, 105, 255, 0.18);
+}
+
+.insights-card p {
+    margin: 0;
+    color: rgba(237, 242, 255, 0.88);
+    line-height: 1.75;
+}
+
+.mood-chart {
+    padding-top: 14px;
+}
+
+.mood-line-chart {
+    width: 100%;
+    height: 160px;
+    overflow: visible;
+}
+
+.chart-labels {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+    color: rgba(193, 203, 255, 0.76);
+    font-size: 0.85rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.stat-row span {
+    color: rgba(197, 206, 255, 0.84);
+}
+
+.stat-row strong {
+    color: #f8f9ff;
+}
+
+@media (max-width: 1060px) {
+    .journal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .journal-header {
+        grid-template-columns: 1fr;
+        padding-bottom: 16px;
+    }
+
+    .session-meta {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 720px) {
+    .journal-shell {
+        padding: 0 16px;
+    }
+
+    .mood-selector {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .slider-controls {
+        flex-direction: column;
+    }
+}
+
+/* =================================================
+   MORNING THEME COMPLETE TEXT VISIBILITY FIX
+   ================================================= */
+
+.theme-morning {
+    --cs-bg: linear-gradient(
+        180deg,
+        #f8f3ee 0%,
+        #f5efe8 50%,
+        #f2ebe3 100%
+    );
+    --cs-text: #3e2e25;
+}
+
+/* Header */
+
+.theme-morning .journal-header {
+    border-bottom: 1px solid rgba(122, 82, 53, 0.08);
+}
+
+.theme-morning .page-title .section-label,
+.theme-morning .session-time,
+.theme-morning .back-link {
+    color: #6d4a33;
+}
+
+.theme-morning .page-title h1 {
+    color: #3e2e25;
+}
+
+.theme-morning .back-link {
+    border-color: rgba(215, 127, 64, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/* Panels */
+
+.theme-morning .panel {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(122, 82, 53, 0.08);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+}
+
+/* Headings */
+
+.theme-morning .sidebar-header h2,
+.theme-morning .card-heading h2,
+.theme-morning .slider-heading h3,
+.theme-morning .motivational-panel h3,
+.theme-morning .stat-row strong {
+    color: #3e2e25;
+}
+
+/* Secondary text */
+
+.theme-morning .view-all,
+.theme-morning .small-label,
+.theme-morning .entry-date,
+.theme-morning .slider-date,
+.theme-morning .slider-meta,
+.theme-morning .page-label,
+.theme-morning .tag-label,
+.theme-morning .date-group label,
+.theme-morning .chart-labels,
+.theme-morning .stat-row span {
+    color: #6b4e3d;
+}
+
+/* Main content */
+
+.theme-morning .entry-item p,
+.theme-morning .slider-preview,
+.theme-morning .insights-card p,
+.theme-morning .motivational-panel p {
+    color: #4d382c;
+}
+
+/* Search & Inputs */
+
+.theme-morning .search-box input,
+.theme-morning .date-group input {
+    background: #ffffff;
+    color: #3e2e25;
+    border: 1px solid rgba(122, 82, 53, 0.08);
+}
+
+.theme-morning .search-box input::placeholder,
+.theme-morning #journalText::placeholder {
+    color: #a08474;
+}
+
+/* Textarea */
+
+.theme-morning #journalText {
+    background: #ffffff;
+    color: #3e2e25;
+    border: 1px solid rgba(122, 82, 53, 0.08);
+}
+
+/* Mood buttons */
+
+.theme-morning .mood-chip {
+    background: #ffffff;
+    color: #4d382c;
+    border: 1px solid rgba(122, 82, 53, 0.08);
+}
+
+.theme-morning .mood-chip:hover,
+.theme-morning .mood-chip.active {
+    background: #f5ece5;
+    color: #3e2e25;
+    border-color: rgba(122, 82, 53, 0.18);
+}
+
+/* Tags & Buttons */
+
+.theme-morning .tag-pill,
+.theme-morning .slide-btn,
+.theme-morning .ai-button {
+    background: #ffffff;
+    color: #4d382c;
+    border: 1px solid rgba(122, 82, 53, 0.08);
+}
+
+/* Journal cards */
+
+.theme-morning .entry-item {
+    background: #ffffff;
+    border: 1px solid rgba(122, 82, 53, 0.05);
+}
+
+.theme-morning .entry-item:hover,
+.theme-morning .entry-item.active {
+    background: #faf5f0;
+    border-color: rgba(122, 82, 53, 0.15);
+}
+
+/* Slider */
+
+.theme-morning .slider-card {
+    background: #ffffff;
+    border: 1px solid rgba(122, 82, 53, 0.08);
+}
+
+.theme-morning .slider-badge {
+    background: rgba(122, 82, 53, 0.08);
+    color: #5c4232;
+}
+
+/* Empty state */
+
+.theme-morning .empty-state {
+    background: #faf7f4;
+    color: #6b4e3d;
+}
+
+/* Stats */
+
+.theme-morning .stat-row {
+    background: #faf7f4;
+}
+
+/* Motivation card */
+
+.theme-morning .motivational-panel {
+    background: linear-gradient(
+        180deg,
+        rgba(188, 152, 122, 0.15),
+        rgba(255, 255, 255, 0.96)
+    );
+    border: 1px solid rgba(122, 82, 53, 0.08);
+}
+/* Remove link underlines in journal entries */
+
+.entry-item,
+.entry-item:hover,
+.entry-item:focus,
+.entry-item:visited,
+.entry-item * {
+    text-decoration: none !important;
+}
+
+/* =====================================
+   MODE BUTTON FIX
+   ===================================== */
+
+/* Night Theme Button */
+.theme-night .session-pill {
+    background: linear-gradient(135deg, #5b63ff, #2c3085);
+    color: #ffffff;
+}
+
+/* Morning Theme Button */
+.theme-morning .session-pill {
+    background: linear-gradient(
+        135deg,
+        #8b5e3c,
+        #664934
+    );
+    color: #ffffff;
+    border: none;
+}
+
+/* Hover */
+.theme-morning .session-pill:hover {
+    background: linear-gradient(
+        135deg,
+        #7b5234,
+        #955d35
+    );
+}
+
+.theme-night .session-pill:hover {
+    background: linear-gradient(
+        135deg,
+        #2c318b,
+        #2c318b
+    );
+}
+/* =====================================
+   THEME DROPDOWN COMPLETE FIX
+   ===================================== */
+
+/* Morning Mode Button */
+.theme-morning #themeSelect {
+    background: #8b5e3c;
+    color: #ffffff;
+    border: none;
+}
+
+/* Morning Mode Dropdown Options */
+.theme-morning #themeSelect option {
+    background: #8b5e3c;
+    color: #ffffff;
+}
+
+/* Night Mode Button */
+.theme-night #themeSelect {
+    background: #2c318b;
+    color: #ffffff;
+    border: none;
+}
+
+/* Night Mode Dropdown Options */
+.theme-night #themeSelect option {
+    background: #2c318b;
+    color: #494646;
+}

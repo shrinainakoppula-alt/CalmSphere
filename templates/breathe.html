@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guided Breathing</title>
+
+    <link rel="stylesheet" href="{% static 'css/breathing.css' %}">
+</head>
+<body>
+    <div id="particles"></div>
+
+<div class="meditation-container">
+
+    <div id="completionModal" class="completion-modal">
+
+    <div class="completion-card">
+
+        <h2>🌟 Session Complete</h2>
+
+        <p>You successfully completed your breathing meditation.</p>
+
+        <button onclick="closeCompletionModal()">
+            Close
+        </button>
+
+    </div>
+
+</div>
+
+    <div class="timer" id="timer">05:00</div>
+
+    <h1 id="phase">Ready to Begin</h1>
+
+    <div class="orb-wrapper">
+
+    <svg class="progress-ring" width="280" height="280">
+
+        <circle
+            class="progress-bg"
+            cx="140"
+            cy="140"
+            r="120"
+        ></circle>
+
+        <circle
+            class="progress-circle"
+            cx="140"
+            cy="140"
+            r="120"
+        ></circle>
+
+    </svg>
+
+    <div class="orb" id="orb"></div>
+
+</div>
+
+    <p class="quote" id="quote">
+        Focus on your breath
+    </p>
+
+    <div class="duration-selector">
+        <label for="durationInput" class="duration-label">Session length (minutes)</label>
+        <input id="durationInput" class="duration-input" type="number" min="1" max="60" value="5">
+    </div>
+    <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+
+</div>
+
+<script src="{% static 'js/breathing.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,377 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Pop – CalmSphere</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a2a2a 0%, #0d3d3a 50%, #0a4a44 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px;
+            color: white;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            z-index: 10;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #6de8d8;
+        }
+
+        .score-bar {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 16px;
+            z-index: 10;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: #6de8d8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-val {
+            font-size: 26px;
+            font-weight: 600;
+            color: white;
+        }
+
+        #canvas {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .controls {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        button.btn-action {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-new {
+            background: #6de8d8;
+            color: #0a2a2a;
+        }
+
+        .btn-new:hover {
+            background: #90f0e4;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <a href="{% url 'games' %}" class="back-btn">← Games</a>
+        <h1>🫧 Bubble Pop</h1>
+        <div style="width:80px"></div>
+    </div>
+
+    <div class="score-bar">
+        <div class="score-item">
+            <div class="score-label">Score</div>
+            <div class="score-val" id="score">0</div>
+        </div>
+        <div class="score-item">
+            <div class="score-label">Popped</div>
+            <div class="score-val" id="popped">0</div>
+        </div>
+        <div class="score-item">
+            <div class="score-label">Best</div>
+            <div class="score-val" id="best">0</div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="controls">
+        <button class="btn-action btn-new" onclick="init()">New Game</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const W = Math.min(560, window.innerWidth - 40);
+        const H = Math.min(520, window.innerHeight - 240);
+        canvas.width = W; canvas.height = H;
+
+        const COLORS = [
+            ['#6de8d8', '#38a89d'], ['#80e8a0', '#38a87a'], ['#7ec8e3', '#3a8cb8'],
+            ['#ffcf6e', '#e8960a'], ['#ff9f9f', '#e84a4a'], ['#c8a2e8', '#8a4ad8'],
+            ['#90f0e4', '#3ac8b0'], ['#ffd6a5', '#e89038']
+        ];
+
+        let bubbles, score, popCount, best = 0, particles = [], spawning;
+
+        function Bubble(x, y, r, col) {
+            return {
+                x, y, r, col, vx: (Math.random() - .5) * 0.5, vy: -0.4 - Math.random() * 0.6,
+                wobble: Math.random() * Math.PI * 2, wobbleSpeed: 0.03 + Math.random() * 0.02,
+                alpha: 0, growing: true, scale: 0.1, alive: true
+            };
+        }
+
+        function init() {
+            bubbles = [];
+            score = 0; popCount = 0;
+            particles = [];
+            clearInterval(spawning);
+            updateUI();
+
+            // spawn initial
+            for (let i = 0; i < 20; i++) spawnBubble();
+
+            spawning = setInterval(() => {
+                if (bubbles.filter(b => b.alive).length < 30) spawnBubble();
+            }, 600);
+
+            loop();
+        }
+
+        function spawnBubble() {
+            const r = 20 + Math.random() * 28;
+            const x = r + Math.random() * (W - 2 * r);
+            const y = H + r;
+            const col = COLORS[Math.floor(Math.random() * COLORS.length)];
+            bubbles.push(Bubble(x, y, r, col));
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('popped').textContent = popCount;
+            document.getElementById('best').textContent = best;
+        }
+
+        function drawBubble(b) {
+            if (!b.alive) return;
+            ctx.save();
+            ctx.globalAlpha = b.alpha;
+            ctx.translate(b.x, b.y);
+            ctx.scale(b.scale, b.scale);
+
+            const wobbleX = Math.sin(b.wobble) * 3;
+
+            // Main bubble
+            const grad = ctx.createRadialGradient(wobbleX - b.r * 0.25, -b.r * 0.25, b.r * 0.1, wobbleX, 0, b.r);
+            grad.addColorStop(0, b.col[0] + 'cc');
+            grad.addColorStop(0.7, b.col[1] + '99');
+            grad.addColorStop(1, b.col[1] + '44');
+            ctx.beginPath();
+            ctx.arc(wobbleX, 0, b.r, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Shine
+            ctx.beginPath();
+            ctx.ellipse(wobbleX - b.r * 0.28, -b.r * 0.28, b.r * 0.25, b.r * 0.15, -0.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            ctx.fill();
+
+            // Border
+            ctx.beginPath();
+            ctx.arc(wobbleX, 0, b.r, 0, Math.PI * 2);
+            ctx.strokeStyle = b.col[0] + '88';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function spawnParticles(x, y, col) {
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const speed = 2 + Math.random() * 3;
+                particles.push({
+                    x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    r: 3 + Math.random() * 4, alpha: 1, col: col[0], life: 40
+                });
+            }
+        }
+
+        let animId;
+        function loop() {
+            cancelAnimationFrame(animId);
+            ctx.clearRect(0, 0, W, H);
+
+            // Background dots
+            ctx.fillStyle = 'rgba(109,232,216,0.03)';
+            for (let i = 0; i < W; i += 40) for (let j = 0; j < H; j += 40) { ctx.beginPath(); ctx.arc(i, j, 1, 0, Math.PI * 2); ctx.fill(); }
+
+            bubbles.forEach(b => {
+                if (!b.alive) return;
+                b.wobble += b.wobbleSpeed;
+                b.vy -= 0.003;
+                b.x += b.vx + Math.sin(b.wobble) * 0.4;
+                b.y += b.vy;
+                if (b.growing) { b.scale = Math.min(1, b.scale + 0.06); if (b.scale >= 1) b.growing = false; }
+                b.alpha = Math.min(1, b.alpha + 0.04);
+                if (b.y < -b.r * 2) b.alive = false;
+                drawBubble(b);
+            });
+
+            // Particles
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--; p.alpha = p.life / 40;
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.col; ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+
+            animId = requestAnimationFrame(loop);
+        }
+
+        function playPopSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioCtx = new AudioContext();
+                
+                // Pop Tone oscillator
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.06);
+                
+                gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.005);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.07);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+                
+                // High frequency click harmonic
+                const clickOsc = audioCtx.createOscillator();
+                const clickGain = audioCtx.createGain();
+                
+                clickOsc.type = 'sine';
+                clickOsc.frequency.setValueAtTime(1600, audioCtx.currentTime);
+                clickOsc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.03);
+                
+                clickGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                clickGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);
+                
+                clickOsc.connect(clickGain);
+                clickGain.connect(audioCtx.destination);
+                
+                clickOsc.start();
+                clickOsc.stop(audioCtx.currentTime + 0.04);
+            } catch(e) {
+                console.log("Audio Pop synth failed:", e);
+            }
+        }
+
+        function pop(e) {
+            const rect = canvas.getBoundingClientRect();
+            const cx = (e.clientX || e.touches[0].clientX) - rect.left;
+            const cy = (e.clientY || e.touches[0].clientY) - rect.top;
+
+            let popped = false;
+            // Check from front to back
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                const b = bubbles[i];
+                if (!b.alive) continue;
+                const dist = Math.hypot(cx - b.x, cy - b.y);
+                if (dist < b.r * b.scale) {
+                    b.alive = false;
+                    spawnParticles(b.x, b.y, b.col);
+                    const pts = Math.round(30 / b.r * 20);
+                    score += pts; popCount++;
+                    if (score > best) best = score;
+                    updateUI();
+                    // Float score
+                    showFloatText(b.x, b.y, '+' + pts, b.col[0]);
+                    
+                    // Trigger sound
+                    playPopSound();
+                    
+                    popped = true;
+                    break;
+                }
+            }
+        }
+
+        function showFloatText(x, y, text, color) {
+            const el = document.createElement('div');
+            el.textContent = text;
+            el.style.cssText = `position:fixed;font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:${color};pointer-events:none;z-index:100;transition:all 0.8s ease-out;`;
+            const rect = canvas.getBoundingClientRect();
+            el.style.left = (rect.left + x - 15) + 'px';
+            el.style.top = (rect.top + y - 15) + 'px';
+            document.body.appendChild(el);
+            requestAnimationFrame(() => { el.style.transform = 'translateY(-40px)'; el.style.opacity = '0'; });
+            setTimeout(() => el.remove(), 800);
+        }
+
+        canvas.addEventListener('click', pop);
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); pop(e); });
+        init();
+    </script>
+</body>
+
+</html>\

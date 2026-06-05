@@ -1,0 +1,1794 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - CalmSphere Reader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PDF.js and Mammoth.js for client-side parsing of PDF and DOCX documents -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        :root {
+            /* Themes */
+            --bg-color: #fcfaf6;
+            --text-color: #3e342c;
+            --accent-color: #bf8b58;
+            --accent-hover: #a67343;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --card-shadow: 0 10px 30px rgba(191, 139, 88, 0.05);
+            --panel-shadow: 0 15px 45px rgba(79, 63, 47, 0.08);
+            --highlight-color: rgba(191, 139, 88, 0.18);
+            --highlight-border: rgba(191, 139, 88, 0.45);
+        }
+
+        /* Sepia Theme */
+        body.theme-sepia {
+            --bg-color: #f4ecd8;
+            --text-color: #5b4636;
+            --glass-bg: rgba(253, 246, 227, 0.75);
+            --glass-border: rgba(213, 196, 161, 0.5);
+            --highlight-color: rgba(189, 137, 85, 0.22);
+            --highlight-border: rgba(189, 137, 85, 0.5);
+        }
+
+        /* Dark Theme */
+        body.theme-dark {
+            --bg-color: #171412;
+            --text-color: #ede2d7;
+            --glass-bg: rgba(33, 28, 25, 0.75);
+            --glass-border: rgba(60, 52, 45, 0.4);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --panel-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+            --highlight-color: rgba(191, 139, 88, 0.25);
+            --highlight-border: rgba(191, 139, 88, 0.6);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* BACKGROUND VIDEO & OVERLAY */
+        #bgVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -3;
+            opacity: 0.08;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        body.theme-dark #bgVideo {
+            opacity: 0.04;
+        }
+
+        /* WORKSPACE LAYOUT */
+        .workspace {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* MAIN READING AREA */
+        .reading-area {
+            flex-grow: 1;
+            padding: 40px 40px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+        }
+
+        @media (max-width: 768px) {
+            .reading-area {
+                padding: 20px 15px 60px;
+            }
+        }
+
+        /* TOP NAV */
+        .top-nav {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--text-color);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .book-title-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0;
+            color: var(--text-color);
+            opacity: 0.9;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* READER CONTAINER */
+        .reader-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--panel-shadow);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            box-sizing: border-box;
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .reader-box {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+        }
+
+        /* DYSLEXIA MODE OVERRIDES */
+        .dyslexia-mode {
+            font-family: 'Comic Sans MS', 'Outfit', sans-serif !important;
+            letter-spacing: 0.12em !important;
+            word-spacing: 0.25em !important;
+            line-height: 2.0 !important;
+        }
+
+        .dyslexia-mode .sentence {
+            line-height: 2.0 !important;
+            margin-bottom: 12px;
+        }
+
+        /* TEXT SIZING */
+        .font-size-sm { font-size: 1rem !important; }
+        .font-size-md { font-size: 1.15rem !important; }
+        .font-size-lg { font-size: 1.35rem !important; }
+        .font-size-xl { font-size: 1.6rem !important; }
+
+        .book-content-display {
+            line-height: 1.8;
+            color: var(--text-color);
+            margin-bottom: 40px;
+            min-height: 200px;
+            text-align: left;
+        }
+
+        /* INTERACTIVE SENTENCES */
+        .sentence {
+            cursor: pointer;
+            padding: 1px 3px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            display: inline;
+            text-decoration: none;
+        }
+
+        .sentence:hover {
+            background: rgba(191, 139, 88, 0.1);
+        }
+
+        .sentence.active-sentence {
+            background: var(--highlight-color);
+            box-shadow: 0 2px 8px var(--highlight-color);
+            animation: pulse-glowing 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glowing {
+            0% { box-shadow: 0 2px 8px rgba(191, 139, 88, 0.15); }
+            50% { box-shadow: 0 2px 14px rgba(191, 139, 88, 0.35); }
+            100% { box-shadow: 0 2px 8px rgba(191, 139, 88, 0.15); }
+        }
+
+        /* PAGE CONTROL BUTTONS INSIDE BOX */
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(191, 139, 88, 0.1);
+            padding-top: 25px;
+        }
+
+        .nav-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .page-indicator-text {
+            font-weight: 600;
+            color: #8c7d70;
+            font-size: 0.92rem;
+        }
+
+        /* READER AUDIO TOOLBAR (INLINE AT THE TOP) */
+        .reader-audio-bar {
+            width: 100%;
+            border-bottom: 1px solid rgba(191, 139, 88, 0.15);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        body.theme-dark .reader-audio-bar {
+            border-bottom-color: rgba(60, 52, 45, 0.5);
+        }
+
+        .dock-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dock-btn {
+            background: var(--accent-color);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.15rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .dock-btn:hover {
+            transform: scale(1.08);
+            background: var(--accent-hover);
+        }
+
+        .dock-btn.btn-secondary {
+            background: rgba(191, 139, 88, 0.12);
+            color: var(--accent-color);
+        }
+
+        .dock-btn.btn-secondary:hover {
+            background: rgba(191, 139, 88, 0.22);
+        }
+
+        .dock-btn.btn-play {
+            width: 52px;
+            height: 52px;
+            font-size: 1.4rem;
+        }
+
+        .dock-selectors {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dock-select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dock-select-group label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #8c7d70;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dock-select {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* FLOATING SIDEBAR PANEL (AI & SETTINGS) */
+        .ai-sidebar {
+            width: 380px;
+            height: 100vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border);
+            box-shadow: var(--panel-shadow);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+                        width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+                        margin-right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* COLLAPSIBLE SIDEBAR ON DESKTOP */
+        @media (min-width: 1100px) {
+            .workspace.sidebar-collapsed .ai-sidebar {
+                width: 0;
+                border-left: none;
+                transform: translateX(100%);
+                pointer-events: none;
+                margin-right: -380px;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .ai-sidebar {
+                position: fixed;
+                right: 0;
+                top: 0;
+                transform: translateX(100%);
+            }
+            .ai-sidebar.active {
+                transform: translateX(0);
+                box-shadow: -15px 0 45px rgba(0,0,0,0.15);
+            }
+            .sidebar-toggle-mobile {
+                display: flex !important;
+            }
+        }
+
+        .sidebar-toggle-mobile {
+            display: flex;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 110;
+            box-shadow: 0 4px 15px rgba(191, 139, 88, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 1100px) {
+            .sidebar-toggle-mobile {
+                display: none; /* hidden on desktop when sidebar is open */
+            }
+        }
+
+        /* SIDEBAR BACKDROP OVERLAY FOR MOBILE */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 85;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-backdrop.active {
+            opacity: 1;
+        }
+
+        /* TAB BAR */
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(191, 139, 88, 0.15);
+            background: rgba(255, 255, 255, 0.25);
+            padding: 10px 10px 0;
+        }
+
+        .tab-btn {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            padding: 12px 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #8c7d70;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* TAB PANELS */
+        .tab-content {
+            flex-grow: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            scrollbar-width: thin;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* AI TOOLS PANEL */
+        .tool-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .action-btn {
+            background: rgba(191, 139, 88, 0.08);
+            border: 1px solid rgba(191, 139, 88, 0.2);
+            color: var(--text-color);
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .ai-output-box {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(191, 139, 88, 0.12);
+            border-radius: 18px;
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-color);
+            min-height: 180px;
+            overflow-y: auto;
+            flex-grow: 1;
+            max-height: 380px;
+            white-space: pre-line;
+            scrollbar-width: thin;
+        }
+
+        body.theme-dark .ai-output-box {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* CHAT PANEL */
+        .chat-messages {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 5px;
+            min-height: 250px;
+            scrollbar-width: thin;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .message.bot {
+            background: rgba(191, 139, 88, 0.08);
+            border: 1px solid rgba(191, 139, 88, 0.15);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-top-left-radius: 2px;
+        }
+
+        .message.user {
+            background: var(--accent-color);
+            color: white;
+            align-self: flex-end;
+            border-top-right-radius: 2px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.92rem;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: background 0.2s;
+        }
+
+        .chat-send-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        /* SETTINGS & ACCESSIBILITY PANEL */
+        .settings-section {
+            margin-bottom: 25px;
+        }
+
+        .settings-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #8c7d70;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .settings-btn {
+            flex-grow: 1;
+            background: rgba(191, 139, 88, 0.06);
+            border: 1px solid rgba(191, 139, 88, 0.15);
+            color: var(--text-color);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .settings-btn:hover {
+            background: rgba(191, 139, 88, 0.12);
+        }
+
+        .settings-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .api-key-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(191, 139, 88, 0.2);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            color: var(--text-color);
+            box-sizing: border-box;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        body.theme-dark .api-key-input {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .api-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .api-status.configured { color: #558833; }
+        .api-status.demo { color: #b87a38; }
+
+        /* BOOKMARK INTIMATION MODAL */
+        .bookmark-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .bookmark-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .bookmark-modal {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 60px rgba(79, 63, 47, 0.15);
+            border-radius: 28px;
+            padding: 35px;
+            width: 90%;
+            max-width: 440px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        body.theme-dark .bookmark-modal {
+            background: rgba(26, 22, 19, 0.95);
+            border-color: rgba(60, 52, 45, 0.6);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+
+        .bookmark-modal-overlay.active .bookmark-modal {
+            transform: scale(1);
+        }
+
+        .bookmark-modal h3 {
+            font-size: 1.4rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--text-color);
+        }
+
+        .bookmark-modal p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #6a5e53;
+            margin-bottom: 25px;
+        }
+
+        body.theme-dark .bookmark-modal p {
+            color: #bfaea0;
+        }
+
+        .bookmark-btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .bookmark-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bookmark-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .bookmark-btn.btn-outline {
+            background: none;
+            border: 1px solid rgba(191, 139, 88, 0.3);
+            color: var(--accent-color);
+        }
+
+        .bookmark-btn.btn-outline:hover {
+            background: rgba(191, 139, 88, 0.08);
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BACKGROUND VIDEO -->
+    <video id="bgVideo" autoplay muted loop>
+        <source src="{% static 'videos/reading.mp4' %}" type="video/mp4">
+    </video>
+
+    <!-- SIDEBAR BACKDROP OVERLAY -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <div class="workspace">
+        
+        <!-- READING WORKSTATION -->
+        <div class="reading-area" id="readingScrollBox">
+            
+            <div class="top-nav">
+                <a href="{% url 'reading' %}" class="back-link">← Library</a>
+                <h2 class="book-title-header">{{ title }}</h2>
+                <button class="back-link" onclick="toggleSidebar()">🤖 AI Assistant</button>
+            </div>
+
+            <div class="reader-box">
+                <!-- INTEGRATED AUDIO TOOLBAR -->
+                <div class="reader-audio-bar">
+                    <div class="dock-controls-left">
+                        <button class="dock-btn btn-secondary" onclick="skipBackward()">↩</button>
+                        <button class="dock-btn btn-play" id="playPauseBtn" onclick="togglePlayAloud()">▶</button>
+                        <button class="dock-btn btn-secondary" onclick="skipForward()">↪</button>
+                        <button class="dock-btn btn-secondary" onclick="stopAloud()">■</button>
+                    </div>
+
+                    <div class="dock-selectors">
+                        <div class="dock-select-group">
+                            <label for="voiceSelect">AI Companion Voice</label>
+                            <select class="dock-select" id="voiceSelect" onchange="changeVoice()"></select>
+                        </div>
+                        <div class="dock-select-group" style="flex-direction: row; align-items: center; gap: 8px; margin-right: 10px; margin-top: 12px;">
+                            <input type="checkbox" id="childVoiceToggle" onchange="toggleChildVoice()" style="width: 18px; height: 18px; cursor: pointer;">
+                            <label for="childVoiceToggle" style="font-size: 0.72rem; font-weight: 700; color: #8c7d70; cursor: pointer; user-select: none; text-transform: uppercase;">👦 Child Voice</label>
+                        </div>
+                        <div class="dock-select-group">
+                            <label for="speedSelect">Reading Rate</label>
+                            <select class="dock-select" id="speedSelect" onchange="changeSpeed()">
+                                <option value="0.75">0.75x (Calm)</option>
+                                <option value="1.0" selected>1.0x (Normal)</option>
+                                <option value="1.25">1.25x</option>
+                                <option value="1.5">1.5x</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="book-content-display font-size-md" id="bookContentText">
+                    <!-- Sentences loaded via JS -->
+                </div>
+
+                <div class="page-navigation">
+                    <button class="nav-btn" id="prevPageBtn" onclick="prevPage()">
+                        <span>←</span> Prev
+                    </button>
+                    <span class="page-indicator-text" id="pageIndicator">Page 1 of 5</span>
+                    <button class="nav-btn" id="nextPageBtn" onclick="nextPage()">
+                        Next <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SIDEBAR PANEL -->
+        <button class="sidebar-toggle-mobile" onclick="toggleSidebar()">🤖</button>
+        <div class="ai-sidebar" id="aiSidebar">
+            
+            <!-- TABS -->
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" onclick="switchTab('ai-assistant')">Assistant</button>
+                <button class="tab-btn" onclick="switchTab('ai-chat')">Q&A Chat</button>
+                <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+                <button class="tab-btn close-sidebar-btn" onclick="toggleSidebar()" style="flex-grow: 0; padding: 12px 15px; color: #c94b4b; font-size: 1.1rem; font-weight: bold; min-width: auto; width: auto; background: none; border: none; cursor: pointer;">✕</button>
+            </div>
+
+            <!-- TAB CONTENT: ASSISTANT -->
+            <div class="tab-content active" id="ai-assistant">
+                <div class="tool-btn-grid">
+                    <button class="action-btn" onclick="triggerAI('summarize')">
+                        <span>📝</span> Summarize Current Page
+                    </button>
+                    <button class="action-btn" onclick="triggerAI('key_points')">
+                        <span>💡</span> Extract Key Points
+                    </button>
+                    <button class="action-btn" onclick="triggerAI('explain')">
+                        <span>🔍</span> Explain Selected Text
+                    </button>
+                </div>
+                <div class="settings-label">AI Output</div>
+                <div class="ai-output-box" id="aiOutput">Click a tool above or highlight some text to get started. Answers will appear here...</div>
+            </div>
+
+            <!-- TAB CONTENT: CHAT -->
+            <div class="tab-content" id="ai-chat">
+                <div class="chat-messages" id="chatMsgContainer">
+                    <div class="message bot">
+                        Hi! I am your CalmSphere reading companion. Ask me any questions about the concepts in this book!
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Ask a question..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                    <button class="chat-send-btn" onclick="sendChatMessage()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="white"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB CONTENT: SETTINGS & ACCESSIBILITY -->
+            <div class="tab-content" id="settings">
+                <div class="settings-section">
+                    <div class="settings-label">Gemini API Key</div>
+                    <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Enter API Key here..." onchange="saveAPIKey()">
+                    <div class="api-status demo" id="apiStatusText">
+                        <span id="apiStatusDot">●</span> <span id="apiStatusLabel">Demo Mode (Mock Responses)</span>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-label">📁 Load Book Document</div>
+                    <p style="font-size: 0.8rem; color: #8c7d70; margin-top: -5px; margin-bottom: 10px; line-height: 1.4;">
+                        Upload the full PDF, DOCX, or TXT file of this book. CalmSphere will extract the text so you can read and listen to the entire book!
+                    </p>
+                    <input type="file" id="bookFileInput" accept=".pdf,.docx,.txt" style="display: none;" onchange="handleBookFileUpload()">
+                    <div class="settings-row">
+                        <button class="settings-btn" onclick="document.getElementById('bookFileInput').click()">📁 Choose Local File</button>
+                        <button class="settings-btn" id="resetDefaultBookBtn" onclick="resetToDefaultSummary()" style="display: none; background: rgba(201, 75, 75, 0.1); border-color: rgba(201, 75, 75, 0.2); color: #c94b4b;">Re-parse Book</button>
+                    </div>
+                    <div id="documentLoadStatus" style="font-size: 0.85rem; margin-top: 8px; font-weight: 600; color: #bf8b58; line-height: 1.4;"></div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-label">Reading Mode Theme</div>
+                    <div class="settings-row">
+                        <button class="settings-btn active" id="theme-light-btn" onclick="setTheme('light')">Light</button>
+                        <button class="settings-btn" id="theme-sepia-btn" onclick="setTheme('sepia')">Sepia</button>
+                        <button class="settings-btn" id="theme-dark-btn" onclick="setTheme('dark')">Dark</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-label">Text Scale</div>
+                    <div class="settings-row">
+                        <button class="settings-btn" id="fs-sm-btn" onclick="setFontScale('sm')">A-</button>
+                        <button class="settings-btn active" id="fs-md-btn" onclick="setFontScale('md')">A</button>
+                        <button class="settings-btn" id="fs-lg-btn" onclick="setFontScale('lg')">A+</button>
+                        <button class="settings-btn" id="fs-xl-btn" onclick="setFontScale('xl')">A++</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-label">Accessibility Enhancements</div>
+                    <div class="settings-row">
+                        <button class="settings-btn" id="dyslexia-btn" onclick="toggleDyslexiaMode()">Dyslexia-Friendly Font</button>
+                        <button class="settings-btn" onclick="toggleFullscreen()">Full Screen</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+    <!-- BOOKMARK INTIMATION MODAL -->
+    <div class="bookmark-modal-overlay" id="bookmarkOverlay">
+        <div class="bookmark-modal">
+            <h3>📖 Resume Reading?</h3>
+            <p>Welcome back! You were reading this book. Would you like to resume from where you left off on Page <span id="bookmarkModalPageNum">1</span>?</p>
+            <div class="bookmark-btn-group">
+                <button class="bookmark-btn" onclick="confirmResumeBookmark(true)">Resume Bookmark</button>
+                <button class="bookmark-btn btn-outline" onclick="confirmResumeBookmark(false)">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        const pages = JSON.parse('{{ pages|escapejs }}');
+        const bookKey = "{{ book_key }}";
+        const bookTitle = "{{ title }}";
+        const serverPdfUrl = "{{ pdf_url|default:'' }}";
+        
+        let currentPage = 0;
+        let activeSentenceIndex = -1;
+        
+        // Progress parameters passed from backend
+        const savedPage = parseInt("{{ saved_page|default:0 }}");
+        const savedSentence = parseInt("{{ saved_sentence|default:0 }}");
+        
+        // TTS State variables
+        let synth = window.speechSynthesis;
+        let sentences = [];
+        let isPlaying = false;
+        let isPaused = false;
+        let selectedVoice = null;
+        let readSpeed = 1.0;
+        let currentUtterance = null;
+        let childVoiceMode = false;
+        let isBookCustomLoaded = false;
+        
+        // Active tracking heartbeats
+        let activeTrackingInterval = null;
+        let trackingType = "reading"; // "reading" or "listening"
+
+        // INITIALIZE
+        window.onload = function() {
+            // Load key from localStorage
+            const key = localStorage.getItem('CS_GEMINI_API_KEY');
+            if (key) {
+                document.getElementById('apiKeyInput').value = key;
+                updateAPIStatus(true);
+            }
+            
+            // Load child voice preference
+            const childMode = localStorage.getItem('child_voice_mode_' + bookKey) === 'true';
+            document.getElementById('childVoiceToggle').checked = childMode;
+            childVoiceMode = childMode;
+            
+            // Initialize Speech Synthesis Voices
+            initVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = initVoices;
+            }
+            
+            // Check cache or configuration URL
+            const cachedPages = localStorage.getItem('parsed_pages_' + bookKey);
+            const cachedLabel = localStorage.getItem('parsed_pages_label_' + bookKey);
+            const configuredUrl = localStorage.getItem('pdf_url_' + bookKey);
+            
+            if (cachedPages) {
+                try {
+                    const parsed = JSON.parse(cachedPages);
+                    setParsedBookPages(parsed, cachedLabel || "Cached Document");
+                } catch (e) {
+                    console.error("Failed to parse cached pages:", e);
+                    localStorage.removeItem('parsed_pages_' + bookKey);
+                    localStorage.removeItem('parsed_pages_label_' + bookKey);
+                    fallbackToDefault();
+                }
+            } else if (configuredUrl) {
+                loadBookPdfFromUrl(configuredUrl);
+            } else {
+                fallbackToDefault();
+            }
+            
+            // Start reading-time tracking heartbeats (every 10 seconds)
+            startActiveTimeTracking();
+        };
+
+        // Custom Book Load Utilities
+        function setParsedBookPages(extractedPages, label) {
+            pages.length = 0;
+            pages.push(...extractedPages);
+            
+            isBookCustomLoaded = true;
+            
+            const resetBtn = document.getElementById('resetDefaultBookBtn');
+            if (resetBtn) {
+                resetBtn.style.display = 'inline-block';
+                if (serverPdfUrl) {
+                    resetBtn.textContent = "♻️ Re-parse Server PDF";
+                } else {
+                    resetBtn.textContent = "Reset to Summary";
+                }
+            }
+            
+            document.querySelector('.book-title-header').textContent = `${bookTitle} (${label})`;
+            
+            currentPage = 0;
+            activeSentenceIndex = -1;
+            
+            // Check bookmark presence and adjust
+            if (savedPage > 0 && savedPage < pages.length) {
+                document.getElementById('bookmarkModalPageNum').textContent = savedPage + 1;
+                document.getElementById('bookmarkOverlay').classList.add('active');
+            } else {
+                loadPage(0);
+            }
+        }
+
+        async function loadBookPdfFromUrl(url) {
+            const statusDiv = document.getElementById('documentLoadStatus');
+            if (statusDiv) statusDiv.textContent = "⏳ Downloading and parsing book PDF from configured link... Please wait.";
+            
+            try {
+                const pdf = await pdfjsLib.getDocument(url).promise;
+                await parsePdfDocument(pdf, url.split('/').pop() || "Remote PDF");
+            } catch (err) {
+                console.error("PDF Link Loading Error:", err);
+                if (statusDiv) statusDiv.textContent = "❌ Failed to load PDF from URL. CORS policy might be blocking direct download. Please download the PDF and load it locally via Choose File.";
+                fallbackToDefault();
+            }
+        }
+
+        async function parsePdfDocument(pdf, sourceLabel) {
+            const statusDiv = document.getElementById('documentLoadStatus');
+            const numPages = pdf.numPages;
+            const extractedPages = [];
+            
+            for (let i = 1; i <= numPages; i++) {
+                if (statusDiv) statusDiv.textContent = `⏳ Extracting text: page ${i} of ${numPages}...`;
+                try {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    let pageText = textContent.items.map(item => item.str).join(" ");
+                    pageText = pageText.replace(/\s+/g, ' ').trim();
+                    if (pageText) {
+                        extractedPages.push(pageText);
+                    }
+                } catch (e) {
+                    console.warn(`Skipped page ${i}:`, e);
+                }
+            }
+            
+            if (extractedPages.length === 0) {
+                throw new Error("No text content could be extracted.");
+            }
+            
+            if (statusDiv) statusDiv.textContent = `✅ Successfully loaded book (${numPages} pages)!`;
+            
+            try {
+                localStorage.setItem('parsed_pages_' + bookKey, JSON.stringify(extractedPages));
+                localStorage.setItem('parsed_pages_label_' + bookKey, sourceLabel);
+            } catch (e) {
+                console.warn("Storage quota exceeded:", e);
+                if (statusDiv) statusDiv.textContent += " (Note: Book is too large to cache, will need reload next time)";
+            }
+            
+            setParsedBookPages(extractedPages, sourceLabel);
+        }
+
+        function handleBookFileUpload() {
+            const fileInput = document.getElementById('bookFileInput');
+            if (fileInput.files.length === 0) return;
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('documentLoadStatus');
+            if (statusDiv) statusDiv.textContent = `⏳ Loading ${file.name}...`;
+            
+            const reader = new FileReader();
+            const extension = file.name.split('.').pop().toLowerCase();
+            
+            if (isPlaying) stopAloud();
+            
+            if (extension === 'pdf') {
+                reader.onload = async function(e) {
+                    try {
+                        const typedarray = new Uint8Array(e.target.result);
+                        const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                        await parsePdfDocument(pdf, file.name);
+                    } catch (err) {
+                        console.error("PDF Parsing Error:", err);
+                        if (statusDiv) statusDiv.textContent = "❌ Failed to parse PDF file.";
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (extension === 'docx') {
+                reader.onload = function(e) {
+                    const arrayBuffer = e.target.result;
+                    mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                        .then(function(result) {
+                            parseRawTextToPages(result.value, file.name);
+                        })
+                        .catch(function(err) {
+                            console.error("DOCX Parsing Error:", err);
+                            if (statusDiv) statusDiv.textContent = "❌ Failed to parse DOCX file.";
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (extension === 'txt') {
+                reader.onload = function(e) {
+                    parseRawTextToPages(e.target.result, file.name);
+                };
+                reader.readAsText(file);
+            } else {
+                if (statusDiv) statusDiv.textContent = "❌ Unsupported format. Please load a PDF, DOCX, or TXT file.";
+            }
+        }
+
+        function parseRawTextToPages(text, filename) {
+            const statusDiv = document.getElementById('documentLoadStatus');
+            const paragraphs = text.split(/\r?\n/);
+            const extractedPages = [];
+            let currentPageText = "";
+            
+            for (let p of paragraphs) {
+                p = p.trim();
+                if (!p) continue;
+                
+                if (currentPageText.length + p.length > 1500 && currentPageText.length > 0) {
+                    extractedPages.push(currentPageText.trim());
+                    currentPageText = "";
+                }
+                currentPageText += p + "\n\n";
+            }
+            if (currentPageText.trim()) {
+                extractedPages.push(currentPageText.trim());
+            }
+            
+            if (extractedPages.length === 0) {
+                if (statusDiv) statusDiv.textContent = "❌ No readable text found.";
+                return;
+            }
+            
+            if (statusDiv) statusDiv.textContent = `✅ Successfully loaded ${filename}!`;
+            
+            try {
+                localStorage.setItem('parsed_pages_' + bookKey, JSON.stringify(extractedPages));
+                localStorage.setItem('parsed_pages_label_' + bookKey, filename);
+            } catch (e) {
+                console.warn("Storage quota exceeded:", e);
+            }
+            
+            setParsedBookPages(extractedPages, filename);
+        }
+
+        function resetToDefaultSummary() {
+            localStorage.removeItem('parsed_pages_' + bookKey);
+            localStorage.removeItem('parsed_pages_label_' + bookKey);
+            location.reload();
+        }
+
+        function fallbackToDefault() {
+            if (serverPdfUrl) {
+                loadBookPdfFromUrl(serverPdfUrl);
+                return;
+            }
+
+            isBookCustomLoaded = false;
+            document.getElementById('resetDefaultBookBtn').style.display = 'none';
+            document.querySelector('.book-title-header').textContent = bookTitle;
+            
+            document.getElementById('bookContentText').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #8c7d70; font-weight: 600; line-height: 1.6;">
+                    ❌ Book PDF is not available on the server.<br>
+                    Please place the PDF file in the <code>static/books/</code> directory.
+                </div>
+            `;
+            document.getElementById('pageIndicator').textContent = "Page 0 of 0";
+            document.getElementById('prevPageBtn').disabled = true;
+            document.getElementById('nextPageBtn').disabled = true;
+        }
+
+        // SIDEBAR TOGGLE (Collapsible on desktop, drawer slide-out on mobile)
+        function toggleSidebar() {
+            const workspace = document.querySelector('.workspace');
+            const sidebar = document.getElementById('aiSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const floatingBtn = document.querySelector('.sidebar-toggle-mobile');
+            
+            if (window.innerWidth < 1100) {
+                sidebar.classList.toggle('active');
+                if (sidebar.classList.contains('active')) {
+                    backdrop.style.display = 'block';
+                    setTimeout(() => backdrop.classList.add('active'), 10);
+                    if (floatingBtn) floatingBtn.style.display = 'none';
+                } else {
+                    backdrop.classList.remove('active');
+                    setTimeout(() => backdrop.style.display = 'none', 300);
+                    if (floatingBtn) floatingBtn.style.display = 'flex';
+                }
+            } else {
+                workspace.classList.toggle('sidebar-collapsed');
+                const isCollapsed = workspace.classList.contains('sidebar-collapsed');
+                if (floatingBtn) {
+                    floatingBtn.style.display = isCollapsed ? 'flex' : 'none';
+                }
+                
+                // Reset mobile active states
+                sidebar.classList.remove('active');
+                backdrop.classList.remove('active');
+                backdrop.style.display = 'none';
+            }
+        }
+
+        // Handle sidebar state adaptation on window resize
+        window.addEventListener('resize', function() {
+            const workspace = document.querySelector('.workspace');
+            const sidebar = document.getElementById('aiSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const floatingBtn = document.querySelector('.sidebar-toggle-mobile');
+            
+            if (window.innerWidth >= 1100) {
+                // Reset mobile overlay states
+                sidebar.classList.remove('active');
+                backdrop.classList.remove('active');
+                backdrop.style.display = 'none';
+                
+                // Show floating button only if workspace is collapsed
+                if (floatingBtn) {
+                    floatingBtn.style.display = workspace.classList.contains('sidebar-collapsed') ? 'flex' : 'none';
+                }
+            } else {
+                // On mobile, show floating button if sidebar is not active
+                if (floatingBtn) {
+                    floatingBtn.style.display = sidebar.classList.contains('active') ? 'none' : 'flex';
+                }
+            }
+        });
+
+        // TABS SWITCH
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // ACCESSIBILITY & STYLING SETTINGS
+        function setTheme(theme) {
+            document.body.classList.remove('theme-light', 'theme-sepia', 'theme-dark');
+            if (theme !== 'light') {
+                document.body.classList.add(`theme-${theme}`);
+            }
+            document.querySelectorAll('.settings-btn[id^="theme-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`theme-${theme}-btn`).classList.add('active');
+        }
+
+        function setFontScale(scale) {
+            const contentBox = document.getElementById('bookContentText');
+            contentBox.classList.remove('font-size-sm', 'font-size-md', 'font-size-lg', 'font-size-xl');
+            contentBox.classList.add(`font-size-${scale}`);
+            
+            document.querySelectorAll('.settings-btn[id^="fs-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`fs-${scale}-btn`).classList.add('active');
+        }
+
+        function toggleDyslexiaMode() {
+            const btn = document.getElementById('dyslexia-btn');
+            const contentBox = document.getElementById('bookContentText');
+            contentBox.classList.toggle('dyslexia-mode');
+            btn.classList.toggle('active');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error enabling fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // LOCAL API KEY SETTINGS
+        function saveAPIKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('CS_GEMINI_API_KEY', key);
+                updateAPIStatus(true);
+            } else {
+                localStorage.removeItem('CS_GEMINI_API_KEY');
+                updateAPIStatus(false);
+            }
+        }
+
+        function updateAPIStatus(configured) {
+            const dot = document.getElementById('apiStatusDot');
+            const label = document.getElementById('apiStatusLabel');
+            const container = document.getElementById('apiStatusText');
+            
+            if (configured) {
+                container.className = "api-status configured";
+                label.textContent = "Gemini Key Configured";
+            } else {
+                container.className = "api-status demo";
+                label.textContent = "Demo Mode (Mock Responses)";
+            }
+        }
+
+        // BOOKMARK CONFIRMATION HANDLER
+        function confirmResumeBookmark(shouldResume) {
+            document.getElementById('bookmarkOverlay').classList.remove('active');
+            if (shouldResume) {
+                loadPage(savedPage, savedSentence);
+            } else {
+                loadPage(0);
+                saveBookmark(0, 0); // Reset
+            }
+        }
+
+        // LOAD PAGE
+        function loadPage(pageIndex, startSentenceIndex = -1) {
+            if (pageIndex < 0 || pageIndex >= pages.length) return;
+            
+            stopAloud();
+            currentPage = pageIndex;
+            
+            // Format page navigation buttons
+            document.getElementById('prevPageBtn').disabled = (currentPage === 0);
+            document.getElementById('nextPageBtn').disabled = (currentPage === pages.length - 1);
+            document.getElementById('pageIndicator').textContent = `Page ${currentPage + 1} of ${pages.length}`;
+            
+            // Parse sentences on this page
+            const rawText = pages[currentPage];
+            // Split by punctuation (sentences)
+            sentences = rawText.match(/[^.!?]+[.!?]+(\s|$)/g) || [rawText];
+            
+            // Display page text wrapped in span tags for highlighting
+            const contentBox = document.getElementById('bookContentText');
+            contentBox.innerHTML = "";
+            
+            sentences.forEach((sentence, idx) => {
+                const span = document.createElement('span');
+                span.className = 'sentence';
+                span.dataset.index = idx;
+                span.textContent = sentence;
+                span.onclick = function() {
+                    playSentence(idx);
+                };
+                contentBox.appendChild(span);
+            });
+            
+            // If requested, set start sentence index and trigger read-aloud
+            if (startSentenceIndex >= 0 && startSentenceIndex < sentences.length) {
+                setTimeout(() => playSentence(startSentenceIndex), 300);
+            } else {
+                activeSentenceIndex = -1;
+            }
+            
+            // Save bookmark state to DB
+            saveBookmark(currentPage, startSentenceIndex >= 0 ? startSentenceIndex : 0);
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                loadPage(currentPage + 1);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                loadPage(currentPage - 1);
+            }
+        }
+
+        // SAVE BOOKMARK VIA AJAX
+        function saveBookmark(page, sentence) {
+            fetch("{% url 'reading_progress' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken()
+                },
+                body: JSON.stringify({
+                    book_key: bookKey,
+                    page: page,
+                    sentence: sentence,
+                    total_pages: pages.length
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log("Bookmark saved:", data))
+            .catch(err => console.error("Error saving bookmark:", err));
+        }
+
+        function getCsrfToken() {
+            const match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : "";
+        }
+
+        // TTS AUDIO READER CONTROLLER
+        function initVoices() {
+            const voiceSelect = document.getElementById('voiceSelect');
+            voiceSelect.innerHTML = "";
+            
+            const list = synth.getVoices();
+            // Filter English voices
+            const englishVoices = list.filter(v => v.lang.includes('en'));
+            
+            if (englishVoices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "Default System Voice";
+                voiceSelect.appendChild(opt);
+                return;
+            }
+
+            englishVoices.forEach(voice => {
+                const opt = document.createElement('option');
+                opt.value = voice.name;
+                // Identify soft/human sounding natural voices if possible
+                let label = voice.name;
+                if (voice.name.toLowerCase().includes('natural') || voice.name.toLowerCase().includes('google') || voice.name.toLowerCase().includes('neural')) {
+                    label += " (Soft Natural Voice)";
+                }
+                opt.textContent = label;
+                voiceSelect.appendChild(opt);
+            });
+            
+            // Auto select a good natural voice if present
+            const preferred = englishVoices.find(v => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('google us english') || v.name.toLowerCase().includes('microsoft zira') || v.name.toLowerCase().includes('microsoft david'));
+            if (preferred) {
+                voiceSelect.value = preferred.name;
+                selectedVoice = preferred;
+            } else {
+                selectedVoice = englishVoices[0];
+            }
+        }
+
+        function changeVoice() {
+            const voiceName = document.getElementById('voiceSelect').value;
+            selectedVoice = synth.getVoices().find(v => v.name === voiceName);
+            if (isPlaying) {
+                // Resume from current sentence with new voice
+                playSentence(activeSentenceIndex);
+            }
+        }
+
+        function changeSpeed() {
+            readSpeed = parseFloat(document.getElementById('speedSelect').value);
+            if (isPlaying) {
+                // Resume from current sentence with new speed
+                playSentence(activeSentenceIndex);
+            }
+        }
+
+        function toggleChildVoice() {
+            childVoiceMode = document.getElementById('childVoiceToggle').checked;
+            localStorage.setItem('child_voice_mode_' + bookKey, childVoiceMode);
+            if (isPlaying) {
+                // Restart current sentence with child voice pitch
+                playSentence(activeSentenceIndex);
+            }
+        }
+
+        // PLAY TEXT UTTERANCE
+        function playSentence(index) {
+            if (index < 0 || index >= sentences.length) {
+                stopAloud();
+                // Move page if finished
+                if (index >= sentences.length && currentPage < pages.length - 1) {
+                    loadPage(currentPage + 1, 0);
+                }
+                return;
+            }
+            
+            synth.cancel();
+            
+            activeSentenceIndex = index;
+            highlightSentence(index);
+            
+            // Save current position
+            saveBookmark(currentPage, activeSentenceIndex);
+            
+            const utteranceText = sentences[activeSentenceIndex];
+            currentUtterance = new SpeechSynthesisUtterance(utteranceText);
+            
+            if (childVoiceMode) {
+                currentUtterance.pitch = 1.4; // High pitch for soothing child voice
+                
+                // Select a female voice for child-like tone if available
+                const list = synth.getVoices();
+                const femaleVoice = list.find(v => v.lang.includes('en') && 
+                    (v.name.toLowerCase().includes('zira') || 
+                     v.name.toLowerCase().includes('hazel') || 
+                     v.name.toLowerCase().includes('female') || 
+                     v.name.toLowerCase().includes('susan') || 
+                     v.name.toLowerCase().includes('haruka') || 
+                     v.name.toLowerCase().includes('google uk english female')));
+                if (femaleVoice) {
+                    currentUtterance.voice = femaleVoice;
+                } else if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                }
+                currentUtterance.rate = readSpeed * 0.85; // Slower soothing speed
+            } else {
+                currentUtterance.pitch = 1.0;
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                }
+                currentUtterance.rate = readSpeed;
+            }
+            
+            // Listening active tracking
+            trackingType = "listening";
+            
+            currentUtterance.onend = function() {
+                if (isPlaying && !isPaused) {
+                    playSentence(activeSentenceIndex + 1);
+                }
+            };
+            
+            currentUtterance.onerror = function(e) {
+                console.error("Speech Synthesis Error:", e);
+                isPlaying = false;
+                updatePlayButton();
+            };
+            
+            isPlaying = true;
+            isPaused = false;
+            updatePlayButton();
+            
+            synth.speak(currentUtterance);
+        }
+
+        function highlightSentence(index) {
+            document.querySelectorAll('.sentence').forEach(el => el.classList.remove('active-sentence'));
+            const activeEl = document.querySelector(`.sentence[data-index="${index}"]`);
+            if (activeEl) {
+                activeEl.classList.add('active-sentence');
+                // Scroll container to center sentence
+                activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function togglePlayAloud() {
+            if (isPlaying) {
+                if (isPaused) {
+                    // Resume
+                    isPaused = false;
+                    trackingType = "listening";
+                    synth.resume();
+                    updatePlayButton();
+                } else {
+                    // Pause
+                    isPaused = true;
+                    trackingType = "reading";
+                    synth.pause();
+                    updatePlayButton();
+                }
+            } else {
+                // Play from beginning of page or last active sentence
+                const startIdx = activeSentenceIndex >= 0 ? activeSentenceIndex : 0;
+                playSentence(startIdx);
+            }
+        }
+
+        function stopAloud() {
+            synth.cancel();
+            isPlaying = false;
+            isPaused = false;
+            trackingType = "reading";
+            document.querySelectorAll('.sentence').forEach(el => el.classList.remove('active-sentence'));
+            updatePlayButton();
+        }
+
+        function skipForward() {
+            // Jump 2 sentences (~10 seconds)
+            const target = activeSentenceIndex >= 0 ? activeSentenceIndex + 2 : 2;
+            playSentence(Math.min(target, sentences.length - 1));
+        }
+
+        function skipBackward() {
+            // Jump back 2 sentences
+            const target = activeSentenceIndex >= 0 ? activeSentenceIndex - 2 : 0;
+            playSentence(Math.max(target, 0));
+        }
+
+        function updatePlayButton() {
+            const btn = document.getElementById('playPauseBtn');
+            if (isPlaying && !isPaused) {
+                btn.textContent = "⏸";
+            } else {
+                btn.textContent = "▶";
+            }
+        }
+
+        // HEARTBEAT ACTIVE TIME TRACKER
+        function startActiveTimeTracking() {
+            if (activeTrackingInterval) clearInterval(activeTrackingInterval);
+            
+            activeTrackingInterval = setInterval(() => {
+                // Only track if document has focus/is visible
+                if (document.hidden) return;
+                
+                fetch("{% url 'reading_track_time' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        type: trackingType,
+                        seconds: 10
+                    })
+                })
+                .then(res => res.json())
+                .then(data => console.log("Time tracked:", data))
+                .catch(err => console.error("Error tracking time:", err));
+            }, 10000);
+        }
+
+        // GEMINI AI ASSISTANT TRIGGERS
+        function triggerAI(action) {
+            const outputBox = document.getElementById('aiOutput');
+            const pageText = pages[currentPage];
+            let selection = window.getSelection().toString().trim();
+            
+            if (action === "explain") {
+                if (!selection) {
+                    outputBox.textContent = "⚠️ Please highlight/select a specific sentence or word in the text first to have it explained!";
+                    return;
+                }
+            } else {
+                // Summarize/Key points defaults to selection if present, else full page
+                selection = selection || pageText;
+            }
+            
+            outputBox.textContent = "🤖 Processing with AI Reading Companion... Please wait...";
+            
+            const key = localStorage.getItem('CS_GEMINI_API_KEY') || "";
+            
+            fetch("{% url 'reading_ai' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                    "X-Gemini-Key": key
+                },
+                body: JSON.stringify({
+                    action: action,
+                    text: selection,
+                    book_title: bookTitle
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    let prefix = "";
+                    if (data.simulated) {
+                        prefix = `💡 [DEMO MODE - MOCK AI]\n${data.message}\n\n`;
+                    }
+                    outputBox.textContent = prefix + data.response;
+                } else {
+                    outputBox.textContent = `❌ Error: ${data.message}`;
+                }
+            })
+            .catch(err => {
+                outputBox.textContent = `❌ Request failed: ${err}`;
+            });
+        }
+
+        // AI Q&A CHAT COMPANION
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            if (!query) return;
+            
+            input.value = "";
+            
+            const chatContainer = document.getElementById('chatMsgContainer');
+            
+            // Append User message
+            const userMsg = document.createElement('div');
+            userMsg.className = "message user";
+            userMsg.textContent = query;
+            chatContainer.appendChild(userMsg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Append Bot loader
+            const botLoader = document.createElement('div');
+            botLoader.className = "message bot";
+            botLoader.textContent = "Thinking...";
+            chatContainer.appendChild(botLoader);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            const key = localStorage.getItem('CS_GEMINI_API_KEY') || "";
+            const pageContext = pages[currentPage];
+            
+            fetch("{% url 'reading_ai' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                    "X-Gemini-Key": key
+                },
+                body: JSON.stringify({
+                    action: "chat",
+                    text: pageContext,
+                    question: query,
+                    book_title: bookTitle
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    let prefix = "";
+                    if (data.simulated) {
+                        prefix = `💡 [DEMO - MOCK AI]\n`;
+                    }
+                    botLoader.textContent = prefix + data.response;
+                } else {
+                    botLoader.textContent = `❌ Error: ${data.message}`;
+                }
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(err => {
+                botLoader.textContent = `❌ Request failed: ${err}`;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>

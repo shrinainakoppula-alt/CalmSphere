@@ -1,0 +1,313 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+}
+
+body{
+min-height:100vh;
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+color:white;
+}
+
+.bg{
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at top left,#38bdf830,transparent),
+radial-gradient(circle at bottom right,#8b5cf630,transparent);
+}
+
+.container{
+width:90%;
+max-width:1000px;
+z-index:2;
+}
+
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+padding:40px;
+border-radius:30px;
+text-align:center;
+border:1px solid rgba(255,255,255,.1);
+}
+
+.hidden{
+display:none;
+}
+
+.icon{
+font-size:4rem;
+margin-bottom:20px;
+}
+
+.subtitle{
+margin-top:15px;
+opacity:.8;
+line-height:1.7;
+}
+
+.features{
+margin:30px 0;
+display:grid;
+gap:15px;
+}
+
+button{
+padding:14px 28px;
+border:none;
+border-radius:14px;
+cursor:pointer;
+font-size:1rem;
+font-weight:600;
+}
+
+#beginBtn,
+#startJourneyBtn{
+background:#38bdf8;
+color:white;
+}
+
+#countdownScreen{
+text-align:center;
+}
+
+.duration-selector{
+    margin:20px auto;
+    max-width:320px;
+    text-align:left;
+}
+
+.duration-label{
+    display:block;
+    margin-bottom:8px;
+    font-size:1rem;
+    font-weight:600;
+}
+
+.duration-input{
+    width:100%;
+    padding:12px 16px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    font-size:1rem;
+}
+
+#countdownNumber{
+font-size:8rem;
+font-weight:700;
+animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+0%{transform:scale(.8);}
+50%{transform:scale(1.2);}
+100%{transform:scale(.8);}
+}
+
+.top-bar{
+display:flex;
+justify-content:space-between;
+margin-bottom:25px;
+}
+
+.meditation-content{
+display:grid;
+grid-template-columns:1fr 2fr;
+gap:40px;
+align-items:center;
+}
+
+.body-panel{
+position:relative;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:500px;
+}
+
+.guide-card{
+background:rgba(255,255,255,.05);
+padding:30px;
+border-radius:25px;
+}
+
+.emoji{
+font-size:3rem;
+margin-bottom:15px;
+}
+
+.guide-card h2{
+margin-bottom:15px;
+}
+
+.guide-card p{
+line-height:1.8;
+}
+
+.tip-card{
+margin-top:25px;
+padding:15px;
+background:rgba(56,189,248,.15);
+border-radius:12px;
+}
+
+.progress-wrapper{
+margin-top:30px;
+height:12px;
+background:#1e293b;
+border-radius:30px;
+overflow:hidden;
+}
+
+#progressBar{
+width:12.5%;
+height:100%;
+background:#38bdf8;
+transition:.6s;
+}
+
+.controls{
+margin-top:25px;
+display:flex;
+justify-content:center;
+gap:15px;
+}
+
+@media(max-width:768px){
+
+.meditation-content{
+grid-template-columns:1fr;
+}
+
+}
+
+.hologram-container {
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.hologram-cylinder {
+    position:relative;
+    width:240px;
+    height:520px;
+    border-radius:70px;
+    border:1px solid rgba(96,189,255,0.28);
+    background: rgba(18,32,60,0.28);
+    box-shadow: inset 0 0 40px rgba(54,166,255,0.12), 0 0 40px rgba(47,128,255,0.08);
+    overflow:hidden;
+    backdrop-filter: blur(10px);
+}
+
+.hologram-cylinder::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(180deg, rgba(67,153,255,0.08), transparent 15%, transparent 85%, rgba(67,153,255,0.08));
+    pointer-events:none;
+}
+
+.hologram-light {
+    position:absolute;
+    left:0;
+    right:0;
+    height:28px;
+    pointer-events:none;
+    background: radial-gradient(circle at center, rgba(126,219,255,0.35), transparent 60%);
+}
+
+.hologram-light.top {
+    top:0;
+}
+
+.hologram-light.bottom {
+    bottom:0;
+    transform: rotateX(180deg);
+}
+
+.hologram-grid {
+    position:absolute;
+    inset:0;
+    background-image: linear-gradient(rgba(126,219,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(126,219,255,0.12) 1px, transparent 1px);
+    background-size: 18px 18px;
+    opacity: 0.28;
+    pointer-events:none;
+}
+
+.hologram-figure {
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    width:220px;
+    height:520px;
+}
+
+.body-region {
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.body-region.active-region circle,
+.body-region.active-region path,
+.body-region.active-region ellipse {
+    filter: drop-shadow(0 0 20px rgba(160,230,255,0.8));
+    transform: translateY(-1px);
+}
+
+@keyframes floatBody {
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+    100%{transform:translateY(0);}
+}
+
+.body-panel{
+position:relative;
+}
+
+.body-panel::before{
+content:"";
+position:absolute;
+
+width:260px;
+height:260px;
+
+border-radius:50%;
+
+background:
+radial-gradient(
+circle,
+rgba(56,189,248,.2),
+transparent 70%
+);
+
+animation:auraPulse 4s infinite;
+}
+
+@keyframes auraPulse{
+
+0%{
+transform:scale(.9);
+opacity:.5;
+}
+
+50%{
+transform:scale(1.2);
+opacity:1;
+}
+
+100%{
+transform:scale(.9);
+opacity:.5;
+}
+
+}

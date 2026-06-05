@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Meditation</title>
+
+    <link rel="stylesheet" href="{% static 'css/bodyscan.css' %}">
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="container">
+
+    <!-- Intro Screen -->
+
+    <div id="introScreen" class="card">
+
+        <div class="icon">🧘</div>
+
+        <h1>Body Meditation</h1>
+
+        <p class="subtitle">
+            Release tension from head to toe through a guided relaxation journey.
+        </p>
+
+        <div class="features">
+
+            <div>✓ Beginner Friendly</div>
+            <div>✓ Guided Instructions</div>
+            <div>✓ Relaxation Tips</div>
+
+        </div>
+
+        <button id="beginBtn">Begin Journey</button>
+
+    </div>
+
+
+    <!-- Instructions Screen -->
+
+    <div id="instructionScreen" class="card hidden">
+
+        <h2>How It Works</h2>
+
+        <div class="steps">
+
+            <div>1️⃣ Sit or lie comfortably</div>
+            <div>2️⃣ Focus on one body area at a time</div>
+            <div>3️⃣ Follow the guidance</div>
+            <div>4️⃣ Release tension gradually</div>
+
+        </div>
+
+        <div class="duration-selector">
+            <label for="durationInput" class="duration-label">Session length (minutes)</label>
+            <input id="durationInput" class="duration-input" type="number" min="1" max="60" value="5">
+        </div>
+
+        <button id="startJourneyBtn">
+            Start Journey
+        </button>
+
+    </div>
+
+
+    <!-- Countdown -->
+
+    <div id="countdownScreen" class="hidden">
+
+        <div id="countdownNumber">
+            3
+        </div>
+
+    </div>
+
+
+    <!-- Meditation Screen -->
+
+    <div id="meditationScreen" class="hidden">
+
+        <div class="top-bar">
+
+            <div id="stepCounter">
+                Step 1 / 8
+            </div>
+
+            <div id="timer">
+                05:00
+            </div>
+
+        </div>
+
+
+        <div class="meditation-content">
+
+            <!-- Human Figure -->
+
+            <div class="body-panel">
+                <div class="hologram-container">
+                    <div class="hologram-cylinder">
+                        <div class="hologram-light top"></div>
+                        <div class="hologram-light bottom"></div>
+                        <div class="hologram-grid"></div>
+                        <svg class="hologram-figure" viewBox="0 0 220 530" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="holoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#a8e6ff" stop-opacity="0.95" />
+                                    <stop offset="60%" stop-color="#63bdfa" stop-opacity="0.8" />
+                                    <stop offset="100%" stop-color="#2a8fe2" stop-opacity="0.7" />
+                                </linearGradient>
+                            </defs>
+                            <g id="head" class="body-region active-region">
+                                <circle cx="110" cy="82" r="36" fill="rgba(168,230,255,0.18)" stroke="url(#holoGrad)" stroke-width="3" />
+                            </g>
+                            <g id="neck" class="body-region">
+                                <path d="M100 118 C100 144 120 144 120 118 L120 145 C120 150 100 150 100 145 Z" fill="rgba(168,230,255,0.14)" stroke="url(#holoGrad)" stroke-width="2.5" />
+                            </g>
+                            <g id="shoulders" class="body-region">
+                                <path d="M28 145 C28 126 192 126 192 145 C192 176 168 190 110 190 C52 190 28 176 28 145 Z" fill="rgba(168,230,255,0.1)" stroke="url(#holoGrad)" stroke-width="2.5" />
+                            </g>
+                            <g id="chest" class="body-region">
+                                <path d="M56 190 C48 242 48 292 72 334 C96 376 124 376 148 334 C172 292 172 242 164 190 Z" fill="rgba(168,230,255,0.12)" stroke="url(#holoGrad)" stroke-width="2.5" />
+                            </g>
+                            <g id="abdomen" class="body-region">
+                                <path d="M76 330 C70 372 74 426 94 466 C108 499 118 499 132 466 C152 426 156 372 150 330 Z" fill="rgba(168,230,255,0.1)" stroke="url(#holoGrad)" stroke-width="2.5" />
+                            </g>
+                            <g id="legs" class="body-region">
+                                <path d="M96 466 C92 506 92 528 104 528 L104 466 Z" fill="rgba(168,230,255,0.12)" stroke="url(#holoGrad)" stroke-width="2.5" />
+                                <path d="M126 466 C122 506 122 528 134 528 L134 466 Z" fill="rgba(168,230,255,0.12)" stroke="url(#holoGrad)" stroke-width="2.5" />
+                            </g>
+                            <g id="feet" class="body-region">
+                                <ellipse cx="104" cy="529" rx="14" ry="7" fill="rgba(168,230,255,0.16)" stroke="url(#holoGrad)" stroke-width="2" />
+                                <ellipse cx="134" cy="529" rx="14" ry="7" fill="rgba(168,230,255,0.16)" stroke="url(#holoGrad)" stroke-width="2" />
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Guidance Card -->
+
+            <div class="guide-card">
+
+                <div id="emoji" class="emoji">
+                    🧠
+                </div>
+
+                <h2 id="title">
+                    Head
+                </h2>
+
+                <p id="instruction">
+                    Notice your forehead and scalp.
+                </p>
+
+                <div class="tip-card">
+                    💡 <span id="tip">
+                    Relax your jaw gently.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="progress-wrapper">
+            <div id="progressBar"></div>
+        </div>
+
+        <div class="controls">
+
+            <button id="pauseBtn">Pause</button>
+            <button id="resumeBtn">Resume</button>
+            <button id="restartBtn">Restart</button>
+
+        </div>
+
+    </div>
+
+
+    <!-- Completion Screen -->
+
+    <div id="completeScreen" class="card hidden">
+
+        <div class="icon">🎉</div>
+
+        <h1>Meditation Complete</h1>
+
+        <p>
+            You successfully completed the Body Scan Journey.
+        </p>
+
+        <button onclick="location.reload()">
+            Start Again
+        </button>
+
+    </div>
+
+</div>
+
+<script src="{% static 'js/bodyscan.js' %}"></script>
+
+</body>
+</html>

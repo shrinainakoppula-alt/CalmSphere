@@ -1,0 +1,327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalmSphere Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            min-height: 100vh;
+            background: #f7f4f1;
+            color: #4f3f2f;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .logo-text .calm-text {
+            color: #c58a57;
+        }
+
+        .logo-text .sphere-text {
+            color: #7a5235;
+        }
+
+        .navbar {
+            background: transparent;
+            padding: 0;
+        }
+
+        .navbar .container-fluid {
+            padding: 0;
+        }
+
+        .dashboard-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 48px 20px;
+        }
+
+        .hero-panel {
+            border-radius: 32px;
+            background: #fffefb;
+            border: 1px solid rgba(191, 139, 88, 0.12);
+            box-shadow: 0 30px 70px rgba(75, 54, 37, 0.06);
+            padding: 52px;
+            margin-bottom: 40px;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(191, 139, 88, 0.1);
+            color: #7a5235;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .hero-title {
+            font-size: clamp(2.8rem, 3vw, 4rem);
+            font-weight: 800;
+            color: #3e342c;
+            line-height: 1.03;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .hero-copy {
+            max-width: 740px;
+            margin: 0 auto;
+            text-align: center;
+            color: #6a5a4c;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .top-tools {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .icon-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 18px;
+            border: 1px solid rgba(191, 139, 88, 0.2);
+            background: #fff;
+            color: #7a5235;
+            display: grid;
+            place-items: center;
+            text-decoration: none;
+            font-size: 1.25rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .icon-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 30px rgba(191, 139, 88, 0.12);
+            background: #fff9f2;
+        }
+
+        .hero-action {
+            display: none;
+        }
+
+        .btn-theme {
+            border-radius: 28px;
+            padding: 14px 28px;
+            background: #bf8b58;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 16px 30px rgba(191, 139, 88, 0.18);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-theme:hover {
+            background: #a26f43;
+            transform: translateY(-1px);
+        }
+
+        .feature-shell {
+            background: #f7f4f1;
+            padding: 32px;
+            border-radius: 32px;
+            border: 1px solid rgba(191, 139, 88, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(240px, 1fr));
+            gap: 22px;
+        }
+
+        .feature-card {
+            background: #ffffff;
+            border-radius: 26px;
+            padding: 30px 24px;
+            color: #4f3f2f;
+            text-decoration: none;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            border: 1px solid rgba(191, 139, 88, 0.12);
+        }
+
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 28px 50px rgba(75, 54, 37, 0.1);
+            border-color: rgba(191, 139, 88, 0.2);
+        }
+
+        .feature-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            background: #f7f1e7;
+            color: #7a5235;
+        }
+
+        .feature-label {
+            font-size: 1.08rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #4f3f2f;
+        }
+
+        .feature-text {
+            color: #6a5a4c;
+            line-height: 1.7;
+            font-size: 0.96rem;
+        }
+
+        @media (max-width: 992px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 720px) {
+            .dashboard-shell {
+                padding: 30px 16px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-shell">
+        <nav class="navbar navbar-expand-lg custom-navbar mb-4">
+            <div class="container-fluid px-0">
+                <a class="navbar-brand logo-text" href="{% url 'dashboard' %}">
+                    <span class="calm-text">Calm</span><span class="sphere-text">Sphere</span>
+                </a>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="icon-button" aria-label="Notifications">🔔</button>
+                    <a href="{% url 'logout' %}" class="icon-button" aria-label="Logout">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.5 3.5C10.5 3.10218 10.8022 2.8 11.2 2.8H18.3C19.587 2.8 20.7 3.913 20.7 5.2V18.8C20.7 20.087 19.587 21.2 18.3 21.2H11.2C10.8022 21.2 10.5 20.8978 10.5 20.5V16.5H9.5C7.84315 16.5 6.5 15.1569 6.5 13.5V10.5C6.5 8.84315 7.84315 7.5 9.5 7.5H10.5V3.5Z" stroke="#7A5235" stroke-width="1.8" fill="none"/>
+                            <path d="M7.5 12H14.5" stroke="#7A5235" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M11.5 9.5L14.5 12L11.5 14.5" stroke="#7A5235" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <div class="hero-panel">
+            <div class="hero-meta">
+                <span class="hero-pill">Take a break. Breathe. Relax.</span>
+            </div>
+            <h1 class="hero-title">Your personal wellness space for a calmer and healthier mind.</h1>
+            <p class="hero-copy">Discover guided meditation, mood journaling, stress-relief activities, breathing exercises, and mindfulness tools carefully designed to help you unwind and feel more balanced.</p>
+        </div>
+
+        <div class="feature-shell">
+            <div class="feature-grid">
+                <a href="{% url 'journal' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">📔</div>
+                    </div>
+                    <div class="feature-label">Journal</div>
+                    <div class="feature-text">Write and reflect in a calm notebook space to track thoughts and mood.</div>
+                </a>
+                <a href="{% url 'chatbot' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">🤖</div>
+                    </div>
+                    <div class="feature-label">AI Chatbot</div>
+                    <div class="feature-text">Get gentle conversational support anytime from your CalmSphere companion.</div>
+                </a>
+                <a href="{% url 'sound' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">🎧</div>
+                    </div>
+                    <div class="feature-label">Sounds</div>
+                    <div class="feature-text">Relax with curated audio scenes designed to soothe and restore your mind.</div>
+                </a>
+                <a href="{% url 'reading' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">📚</div>
+                    </div>
+                    <div class="feature-label">Reading</div>
+                    <div class="feature-text">Explore mindful reading content with a soothing layout and calm pacing.</div>
+                </a>
+                <a href="{% url 'games' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">🎮</div>
+                    </div>
+                    <div class="feature-label">Games</div>
+                    <div class="feature-text">Play light, calming games that refresh your focus and lift your mood.</div>
+                </a>
+                <a href="{% url 'meditation' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">🧘</div>
+                    </div>
+                    <div class="feature-label">Meditation</div>
+                    <div class="feature-text">Enjoy guided breathing and meditation practices to center your day.</div>
+                </a>
+                <a href="{% url 'mood_quiz' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">🧩</div>
+                    </div>
+                    <div class="feature-label">Mood Quiz</div>
+                    <div class="feature-text">Take a fun, interactive quiz to find your current mood archetype and get personalized recommendations.</div>
+                </a>
+                <a href="{% url 'monthly_report' %}" class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">📊</div>
+                    </div>
+                    <div class="feature-label">Wellness Reports</div>
+                    <div class="feature-text">See a comprehensive summary of your daily, weekly, monthly, and yearly progress.</div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/global_notifications.js' %}"></script>
+    {% if mood %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof CS_Reminders !== 'undefined') {
+                CS_Reminders.suggestForMood("{{ mood|escapejs }}");
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+
+</html>

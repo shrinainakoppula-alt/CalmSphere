@@ -1,0 +1,400 @@
+﻿*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    font-family: Poppins, sans-serif;
+    color: #fff;
+    background: radial-gradient(circle at center, rgba(255, 214, 88, 0.08), transparent 18%),
+                radial-gradient(circle at top left, rgba(255, 151, 50, 0.1), transparent 22%),
+                linear-gradient(180deg, #0b0821 0%, #130a2b 62%, #0f0b24 100%);
+    text-rendering: optimizeLegibility;
+}
+
+#omBackground {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.overlay {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 24px 80px;
+}
+
+.top-bar {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 48px);
+    max-width: 1120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    z-index: 20;
+}
+
+.page-pill,
+.page-pill.chant-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(16, 8, 44, 0.7);
+    color: #f8e8c3;
+    font-size: 0.98rem;
+    font-weight: 600;
+    backdrop-filter: blur(12px);
+}
+
+.page-pill.chant-btn {
+    cursor: pointer;
+}
+
+.pill-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.12);
+}
+
+.timer-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 32px;
+    border-radius: 56px;
+    background: rgba(16, 8, 50, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(24px);
+    flex: 0 1 auto;
+}
+
+.timer {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.24);
+}
+
+.timer-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255, 233, 167, 0.88);
+    font-size: 0.72rem;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.timer-label span {
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.65), rgba(251,191,36,0.95));
+}
+
+.central-card {
+    position: relative;
+    margin-top: 48px;
+    margin-bottom: 42px;
+    width: min(520px, 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 18px;
+}
+
+.main-om {
+    position: relative;
+    font-size: clamp(130px, 11vw, 190px);
+    color: #f9d85c;
+    letter-spacing: 0.03em;
+    z-index: 10;
+    text-shadow:
+        0 0 18px rgba(255, 196, 65, 0.65),
+        0 0 48px rgba(251, 176, 33, 0.36),
+        0 14px 30px rgba(17, 8, 41, 0.42);
+    animation: pulse 5s ease-in-out infinite;
+}
+
+.main-om::before,
+.main-om::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.main-om::before {
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(255, 214, 107, 0.26), transparent 55%);
+    filter: blur(18px);
+}
+
+.main-om::after {
+    width: 360px;
+    height: 360px;
+    border: 1px solid rgba(255, 212, 104, 0.18);
+    box-shadow: 0 0 68px rgba(255, 201, 61, 0.22);
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.035); }
+}
+
+.subtitle-pill {
+    margin-top: 28px;
+    margin-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(20px);
+    color: #f8e6c2;
+    font-size: 1rem;
+    font-weight: 500;
+    max-width: min(740px, 100%);
+    text-align: center;
+}
+
+.chant-btn{
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+.subtitle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffebac;
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.08);
+}
+
+.duration-options {
+    margin: 30px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.duration-label {
+    font-weight: 600;
+    color: #f8e8c2;
+    font-size: 0.98rem;
+}
+
+.duration-input {
+    width: 120px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.controls {
+    margin-top: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 44px;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.control-btn button {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: radial-gradient(circle at top, rgba(255,255,255,0.12), rgba(45, 20, 85, 0.72));
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.08), 0 18px 42px rgba(0,0,0,0.28);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.control-btn button:hover {
+    transform: translateY(-2px);
+}
+
+.play-btn {
+    width: 128px;
+    height: 128px;
+    font-size: 40px;
+    border-color: rgba(251, 191, 39, 0.6);
+    background: radial-gradient(circle at center, rgba(251, 191, 39, 0.95), rgba(88, 52, 165, 0.4));
+    box-shadow:
+        0 0 42px rgba(251, 175, 58, 0.35),
+        inset 0 0 28px rgba(255, 255, 255, 0.16);
+}
+
+.small-btn {
+    width: 96px;
+    height: 96px;
+}
+
+.control-btn span {
+    font-size: 0.95rem;
+    color: #f8e4b5;
+    letter-spacing: 0.02em;
+}
+
+.duration-options {
+    margin-top: 500px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.duration-options button {
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8e6c2;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    transition: all 0.25s ease;
+}
+
+.duration-options button:hover {
+    background: rgba(251, 191, 39, 0.2);
+    border-color: rgba(251, 191, 39, 0.5);
+}
+
+.background-om {
+    position: absolute;
+    color: rgba(247, 205, 94, 0.24);
+    mix-blend-mode: screen;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(255, 210, 120, 0.18);
+}
+
+.sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255, 220, 120, 0.95);
+    box-shadow: 0 0 10px rgba(255, 220, 120, 0.65);
+    opacity: 0;
+    animation: sparkle 4s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0.4); }
+    45%, 55% { opacity: 1; transform: scale(1.1); }
+}
+
+@media (max-width: 900px) {
+    .top-bar {
+        position: static;
+        transform: none;
+        width: auto;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .timer-card {
+        width: min(100%, 100%);
+        margin-top: 100px;
+    }
+    .main-om {
+        font-size: 160px;
+    }
+    .controls {
+        gap: 24px;
+    }
+    .control-btn button {
+        width: 78px;
+        height: 78px;
+        font-size: 24px;
+    }
+    .play-btn {
+        width: 106px;
+        height: 106px;
+        font-size: 32px;
+    }
+    .subtitle-pill {
+        width: min(100%, 100%);
+        padding: 14px 22px;
+    }
+}
+#bgVideo{
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    z-index:-2;
+}
+
+.overlay{
+    position:relative;
+    z-index:10;
+
+    width:100%;
+    height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+}

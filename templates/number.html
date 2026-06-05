@@ -1,0 +1,280 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Tap – CalmSphere</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #001e3c 0%, #003a70 50%, #00568a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 16px;
+            color: white;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #7dd8ff;
+        }
+
+        .info-bar {
+            display: flex;
+            gap: 28px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #7dd8ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-val {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .next-hint {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 14px;
+        }
+
+        .next-hint span {
+            color: #7dd8ff;
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: min(420px, 90vw);
+        }
+
+        .num-cell {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(14px, 4vw, 22px);
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(125, 216, 255, 0.12);
+            border: 1.5px solid rgba(125, 216, 255, 0.25);
+            color: white;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .num-cell:hover:not(.done) {
+            background: rgba(125, 216, 255, 0.25);
+            transform: scale(1.06);
+        }
+
+        .num-cell.done {
+            background: linear-gradient(135deg, #1a7abd, #2a9ae8);
+            border-color: #7dd8ff;
+            color: white;
+            cursor: default;
+            transform: scale(0.95);
+        }
+
+        .num-cell.wrong {
+            background: rgba(255, 80, 80, 0.3);
+            border-color: #ff8080;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-6px);
+            }
+
+            75% {
+                transform: translateX(6px);
+            }
+        }
+
+        /* Controls section (outside animation!) */
+        .controls {
+            margin-top: 18px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button.btn-action {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-new {
+            background: #7dd8ff;
+            color: #001e3c;
+        }
+
+        .btn-new:hover {
+            background: #a8e8ff;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            font-size: 17px;
+            color: #7dd8ff;
+            font-weight: 600;
+            min-height: 28px;
+            text-align: center;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <a href="{% url 'games' %}" class="back-btn">← Games</a>
+        <h1>🔵 Number Tap</h1>
+        <div style="width:80px"></div>
+    </div>
+
+    <div class="info-bar">
+        <div class="info-item">
+            <div class="info-label">Next</div>
+            <div class="info-val" id="next">1</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Time</div>
+            <div class="info-val" id="timer">0.0s</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Best</div>
+            <div class="info-val" id="best">—</div>
+        </div>
+    </div>
+
+    <div id="grid"></div>
+    <div class="result" id="result"></div>
+
+    <div class="controls">
+        <button class="btn-action btn-new" onclick="newGame()">New Game</button>
+    </div>
+
+    <script>
+        let numbers, nextNum, startTime, timerInterval, best = null, started = false;
+
+        function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+        function newGame() {
+            numbers = shuffle([...Array(25)].map((_, i) => i + 1));
+            nextNum = 1; started = false;
+            clearInterval(timerInterval);
+            document.getElementById('timer').textContent = '0.0s';
+            document.getElementById('next').textContent = '1';
+            document.getElementById('result').textContent = '';
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const g = document.getElementById('grid');
+            g.innerHTML = '';
+            numbers.forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'num-cell' + (n < nextNum ? ' done' : '');
+                div.textContent = n < nextNum ? '✓' : n;
+                div.dataset.n = n;
+                div.addEventListener('click', () => tap(n, div));
+                g.appendChild(div);
+            });
+        }
+
+        function tap(n, el) {
+            if (n < nextNum) return;
+            if (!started) { started = true; startTime = Date.now(); timerInterval = setInterval(updateTimer, 100); }
+            if (n === nextNum) {
+                el.textContent = '✓'; el.classList.add('done');
+                nextNum++;
+                document.getElementById('next').textContent = nextNum <= 25 ? nextNum : '✓';
+                if (nextNum > 25) { finish(); }
+            } else {
+                el.classList.add('wrong');
+                setTimeout(() => el.classList.remove('wrong'), 300);
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            document.getElementById('timer').textContent = elapsed + 's';
+        }
+
+        function finish() {
+            clearInterval(timerInterval);
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            document.getElementById('timer').textContent = elapsed + 's';
+            if (best === null || +elapsed < +best) best = elapsed;
+            document.getElementById('best').textContent = best + 's';
+            document.getElementById('result').textContent = `🎉 Done in ${elapsed}s! ${+elapsed === +best ? 'New best!' : ''}`;
+        }
+
+        newGame();
+    </script>
+</body>
+
+</html>

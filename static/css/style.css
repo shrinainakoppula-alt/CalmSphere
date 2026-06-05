@@ -1,0 +1,281 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f7f4f1;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* NAVBAR */
+
+.custom-navbar {
+    background-color: #f7f4f1;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.logo-text {
+    font-size: 2rem;
+    font-weight: 700;
+    text-decoration: none;
+
+    .calm-text {
+        color: #c58a57;
+    }
+
+    .sphere-text {
+        color: #7a5235;
+    }
+}
+
+.nav-links {
+    margin-right: 20px;
+}
+
+.nav-item-custom {
+    text-decoration: none;
+    color: #6d4a33;
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav-item-custom:hover {
+    color: #a26f43;
+}
+
+.signup-btn {
+    background-color: #bf8b58;
+    color: white;
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.signup-btn:hover {
+    background-color: #a26f43;
+    color: white;
+}
+
+/* HERO SECTION */
+
+.hero-section {
+    width: 100%;
+    height: 88vh;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    margin-top: 2px;
+}
+
+.hero-section {
+    position: relative;
+    width: 100%;
+    height: 88vh;
+    overflow: hidden;
+    background: black;
+}
+
+.bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    opacity: 0;
+    transform: scale(1.1);
+
+    animation: videoReveal 3s ease forwards;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.45);
+}
+
+@keyframes videoReveal {
+
+    0% {
+        opacity: 0;
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* MOBILE RESPONSIVE */
+
+@media (max-width: 768px) {
+
+    .logo-text {
+        font-size: 1.8rem;
+    }
+
+    .nav-links {
+        gap: 12px !important;
+        margin-right: 0;
+    }
+
+    .nav-item-custom {
+        font-size: 0.9rem;
+    }
+
+    .signup-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .hero-section {
+        height: 70vh;
+    }
+}
+
+/* SMOOTH SCROLL */
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ABOUT SECTION */
+
+.about-section {
+    padding: 100px 8%;
+    background-color: #f7f4f1;
+}
+
+.about-title {
+    font-size: 3rem;
+    color: #7a5235;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.about-text {
+    font-size: 1.1rem;
+    color: #6d4a33;
+    line-height: 2;
+    margin-bottom: 20px;
+}
+
+.about-image {
+    width: 90%;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* HERO ANIMATION */
+
+.hero-section {
+    width: 100%;
+    height: 88vh;
+
+    background-image: url("../videos/hero-bg.mp4");
+
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    margin-top: 2px;
+
+    position: relative;
+    overflow: hidden;
+
+    animation: slowZoom 18s ease-in-out infinite alternate;
+}
+
+/* SLOW BACKGROUND MOVEMENT */
+
+@keyframes slowZoom {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.03);
+    }
+}
+
+/* BIRDS */
+
+.bird {
+    position: absolute;
+    font-size: 28px;
+    opacity: 0.7;
+    animation: flyBirds linear infinite;
+}
+
+.bird1 {
+    top: 18%;
+    right: -10%;
+    animation-duration: 18s;
+}
+
+.bird2 {
+    top: 24%;
+    right: -15%;
+    animation-duration: 24s;
+}
+
+.bird3 {
+    top: 30%;
+    right: -12%;
+    animation-duration: 20s;
+}
+
+@keyframes flyBirds {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-1600px);
+    }
+}
+
+/* WATER SHIMMER */
+
+.water-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    height: 20%;
+
+    background: linear-gradient(to top,
+            rgba(255, 255, 255, 0.10),
+            transparent);
+
+    animation: shimmer 4s ease-in-out infinite alternate;
+}
+
+@keyframes shimmer {
+    from {
+        opacity: 0.3;
+    }
+
+    to {
+        opacity: 0.7;
+    }
+}

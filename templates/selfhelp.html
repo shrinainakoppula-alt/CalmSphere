@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Want to Relax!! Check this out</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #edf8f7;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #edf8f7;
+            color: rgb(10, 10, 10);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .section {
+            display: flex;
+            align-items: center;
+            background: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 70%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .section:hover {
+            transform: scale(1.02);
+            background: #eef5ff;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-right: 20px;
+        }
+
+        .content h2 {
+            margin: 0;
+        }
+
+        .content p {
+            margin-top: 5px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BACK BUTTON -->
+    <div style="display: flex; justify-content: flex-end;">
+        <a href="{% url 'dashboard' %}" class="back-btn">← Back</a>
+    </div>
+    <h1>Self Help</h1>
+
+    <!-- SOUND -->
+    <a href="{% url 'sound' %}" style="text-decoration: none; color: inherit;">
+        <div class="section">
+            <div class="icon">🎧</div>
+            <div class="content">
+                <h2>Sound Therapy</h2>
+                <p>Relax your mind with calming music, nature sounds, and soothing audio sessions.</p>
+            </div>
+        </div>
+
+        <!-- READING -->
+        <a href="{% url 'reading' %}" style="text-decoration: none; color: inherit;">
+            <div class="section">
+                <div class="icon">📖</div>
+                <div class="content">
+                    <h2>Reading Therapy</h2>
+                    <p>Explore helpful articles and positive content to improve your mental well-being.</p>
+                </div>
+            </div>
+
+            <!-- GAMES -->
+            <a href="{% url 'games' %}" style="text-decoration: none; color: inherit;">
+                <div class="section">
+                    <div class="icon">🎮</div>
+                    <div class="content">
+                        <h2>Games</h2>
+                        <p>Engage in simple games designed to reduce stress and refresh your mind.</p>
+                    </div>
+                </div>
+                <!-- BREATHING -->
+                <a href="{% url 'breathing' %}" style="text-decoration: none; color: inherit;">
+                    <div class="section">
+                        <div class="icon">🧘</div>
+                        <div class="content">
+                            <h2>Meditation</h2>
+                            <p>Follow simple breathing techniques to calm your mind and reduce stress instantly.</p>
+                        </div>
+                    </div>
+</body>
+
+</html>

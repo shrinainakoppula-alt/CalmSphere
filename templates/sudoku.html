@@ -1,0 +1,358 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku – CalmSphere</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2d1b69 0%, #4a2090 50%, #6a35b0 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px;
+            color: white;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #d4b8ff;
+        }
+
+        .diff-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .diff-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .diff-btn.active,
+        .diff-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            width: min(460px, 92vw);
+            height: min(460px, 92vw);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(14px, 3.5vw, 22px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            color: #e8d8ff;
+        }
+
+        .cell.given {
+            color: white;
+            font-weight: 600;
+        }
+
+        .cell.selected {
+            background: rgba(212, 184, 255, 0.3) !important;
+        }
+
+        .cell.same-num {
+            background: rgba(212, 184, 255, 0.15);
+        }
+
+        .cell.error {
+            color: #ff8080 !important;
+        }
+
+        /* Thick borders for 3x3 boxes */
+        .cell:nth-child(3n) {
+            border-right: 2px solid rgba(255, 255, 255, 0.45);
+        }
+
+        .cell:nth-child(9n) {
+            border-right: none;
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 6px;
+            margin-top: 18px;
+            width: min(460px, 92vw);
+        }
+
+        .num-btn {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(13px, 3vw, 18px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .num-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .controls {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button.btn-action {
+            padding: 10px 22px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-new {
+            background: #d4b8ff;
+            color: #2d1b69;
+        }
+
+        .btn-new:hover {
+            background: #e8d8ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-clr {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-clr:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .msg {
+            margin-top: 14px;
+            font-size: 16px;
+            color: #d4b8ff;
+            min-height: 28px;
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <a href="{% url 'games' %}" class="back-btn">← Games</a>
+        <h1>🔢 Sudoku</h1>
+        <div style="width:80px"></div>
+    </div>
+
+    <div class="diff-row">
+        <button class="diff-btn active" onclick="setDiff('easy',this)">Easy</button>
+        <button class="diff-btn" onclick="setDiff('medium',this)">Medium</button>
+        <button class="diff-btn" onclick="setDiff('hard',this)">Hard</button>
+    </div>
+
+    <div id="grid"></div>
+
+    <div class="numpad">
+        <button class="num-btn" onclick="inputNum(1)">1</button>
+        <button class="num-btn" onclick="inputNum(2)">2</button>
+        <button class="num-btn" onclick="inputNum(3)">3</button>
+        <button class="num-btn" onclick="inputNum(4)">4</button>
+        <button class="num-btn" onclick="inputNum(5)">5</button>
+        <button class="num-btn" onclick="inputNum(6)">6</button>
+        <button class="num-btn" onclick="inputNum(7)">7</button>
+        <button class="num-btn" onclick="inputNum(8)">8</button>
+        <button class="num-btn" onclick="inputNum(9)">9</button>
+    </div>
+
+    <div class="controls">
+        <button class="btn-action btn-new" onclick="newGame()">New Puzzle</button>
+        <button class="btn-action btn-clr" onclick="clearCell()">Clear</button>
+    </div>
+    <div class="msg" id="msg"></div>
+
+    <script>
+        let puzzle, solution, given, selected = null, difficulty = 'easy';
+
+        const BASES = [
+            // Each is a solved board base
+            [5, 3, 4, 6, 7, 8, 9, 1, 2, 6, 7, 2, 1, 9, 5, 3, 4, 8, 1, 9, 8, 3, 4, 2, 5, 6, 7, 8, 5, 9, 7, 6, 1, 4, 2, 3, 4, 2, 6, 8, 5, 3, 7, 9, 1, 7, 1, 3, 9, 2, 4, 8, 5, 6, 9, 6, 1, 5, 3, 7, 2, 8, 4, 2, 8, 7, 4, 1, 9, 6, 3, 5, 3, 4, 5, 2, 8, 6, 1, 7, 9],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 1, 2, 3, 4, 5, 6, 4, 5, 6, 7, 8, 9, 1, 2, 3, 2, 3, 4, 5, 6, 7, 8, 9, 1, 5, 6, 7, 8, 9, 1, 2, 3, 4, 8, 9, 1, 2, 3, 4, 5, 6, 7, 3, 4, 5, 6, 7, 8, 9, 1, 2, 6, 7, 8, 9, 1, 2, 3, 4, 5, 9, 1, 2, 3, 4, 5, 6, 7, 8],
+        ];
+
+        function getBase() { return [...BASES[Math.floor(Math.random() * BASES.length)]]; }
+
+        function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+        function generatePuzzle() {
+            solution = getBase();
+            // Shuffle rows within bands and columns within stacks
+            const rows = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
+            const g = [];
+            for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) g.push(solution[r * 9 + c]);
+
+            puzzle = [...solution];
+            const clues = difficulty === 'easy' ? 45 : difficulty === 'medium' ? 35 : 28;
+            const remove = 81 - clues;
+            const positions = shuffle([...Array(81).keys()]);
+            for (let i = 0; i < remove; i++) puzzle[positions[i]] = 0;
+
+            given = puzzle.map(v => v !== 0);
+        }
+
+        function setDiff(d, btn) {
+            difficulty = d;
+            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            newGame();
+        }
+
+        function newGame() {
+            generatePuzzle();
+            selected = null;
+            document.getElementById('msg').textContent = '';
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const el = document.getElementById('grid');
+            el.innerHTML = '';
+            // Add thick row borders via wrapping rows
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    const idx = r * 9 + c;
+                    const cell = document.createElement('div');
+                    cell.className = 'cell' + (given[idx] ? ' given' : '') + (puzzle[idx] === solution[idx] && puzzle[idx] ? '' : puzzle[idx] ? ' error' : '');
+                    cell.dataset.idx = idx;
+                    if (puzzle[idx]) cell.textContent = puzzle[idx];
+                    // extra border for 3x3 box bottom
+                    let style = '';
+                    if (r === 2 || r === 5) style += 'border-bottom:2px solid rgba(255,255,255,0.45);';
+                    if (style) cell.style.cssText = style;
+                    cell.addEventListener('click', () => selectCell(idx));
+                    el.appendChild(cell);
+                }
+            }
+            highlightSelected();
+        }
+
+        function selectCell(idx) {
+            if (given[idx]) { selected = idx; highlightSelected(); return; }
+            selected = idx;
+            highlightSelected();
+        }
+
+        function highlightSelected() {
+            document.querySelectorAll('.cell').forEach((c, i) => {
+                c.classList.remove('selected', 'same-num');
+                if (i === selected) c.classList.add('selected');
+                else if (selected !== null && puzzle[i] && puzzle[i] === puzzle[selected]) c.classList.add('same-num');
+            });
+        }
+
+        function inputNum(n) {
+            if (selected === null || given[selected]) return;
+            puzzle[selected] = n;
+            const cell = document.querySelector(`[data-idx="${selected}"]`);
+            cell.textContent = n;
+            cell.classList.toggle('error', n !== solution[selected]);
+            highlightSelected();
+            checkWin();
+        }
+
+        function clearCell() {
+            if (selected === null || given[selected]) return;
+            puzzle[selected] = 0;
+            const cell = document.querySelector(`[data-idx="${selected}"]`);
+            cell.textContent = '';
+            cell.classList.remove('error');
+            highlightSelected();
+        }
+
+        function checkWin() {
+            if (puzzle.every((v, i) => v === solution[i])) {
+                document.getElementById('msg').textContent = '🎉 Puzzle solved! Well done!';
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key >= '1' && e.key <= '9') inputNum(+e.key);
+            if (e.key === 'Backspace' || e.key === 'Delete') clearCell();
+            if (selected !== null) {
+                const moves = { ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1 };
+                if (moves[e.key] !== undefined) { e.preventDefault(); const n = selected + moves[e.key]; if (n >= 0 && n < 81) selectCell(n); }
+            }
+        });
+
+        newGame();
+    </script>
+</body>
+
+</html>

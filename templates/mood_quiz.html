@@ -1,0 +1,704 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Quiz - CalmSphere</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            background: #f7f4f1;
+            color: #4f3f2f;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .logo-text .calm-text {
+            color: #c58a57;
+        }
+
+        .logo-text .sphere-text {
+            color: #7a5235;
+        }
+
+        .quiz-shell {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .quiz-card {
+            background: #fffefb;
+            border-radius: 32px;
+            border: 1px solid rgba(191, 139, 88, 0.12);
+            box-shadow: 0 30px 70px rgba(75, 54, 37, 0.06);
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #ffffff;
+            color: #7a5235;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 1px solid rgba(191, 139, 88, 0.15);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn:hover {
+            background: #fff9f2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(191, 139, 88, 0.08);
+            color: #5c3c24;
+        }
+
+        /* Screen state styling */
+        .quiz-screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .quiz-screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            height: 8px;
+            background: #ede6df;
+            border-radius: 999px;
+            margin: 25px 0 35px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #c58a57, #7a5235);
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #8c7a6b;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Choice options */
+        .choices-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .choice-option {
+            background: #ffffff;
+            border: 2px solid rgba(191, 139, 88, 0.1);
+            border-radius: 20px;
+            padding: 20px 24px;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4f3f2f;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .choice-option:hover {
+            border-color: #c58a57;
+            background: #fffbf7;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(191, 139, 88, 0.08);
+        }
+
+        .choice-option:active {
+            transform: translateY(0);
+        }
+
+        .choice-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(191, 139, 88, 0.2);
+            display: grid;
+            place-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .choice-option:hover .choice-check {
+            border-color: #c58a57;
+        }
+
+        /* Hero details */
+        .quiz-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #3e342c;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .quiz-desc {
+            color: #6a5a4c;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 35px;
+        }
+
+        .btn-start {
+            border-radius: 999px;
+            padding: 16px 40px;
+            background: #bf8b58;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 16px 30px rgba(191, 139, 88, 0.2);
+            transition: all 0.25s ease;
+        }
+
+        .btn-start:hover {
+            background: #a26f43;
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(191, 139, 88, 0.3);
+        }
+
+        /* Result Panel */
+        .result-panel {
+            text-align: center;
+        }
+
+        .result-card {
+            border-radius: 24px;
+            padding: 40px 30px;
+            color: #ffffff;
+            margin-bottom: 35px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .archetype-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-top: 10px;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .archetype-subtitle {
+            font-size: 1.15rem;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .archetype-desc {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .recs-heading {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #3e342c;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .recs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        @media (max-width: 576px) {
+            .recs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .rec-card {
+            background: #ffffff;
+            border: 1px solid rgba(191, 139, 88, 0.12);
+            border-radius: 20px;
+            padding: 24px;
+            text-decoration: none;
+            color: #4f3f2f;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            text-align: left;
+            transition: all 0.25s ease;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(191, 139, 88, 0.1);
+            border-color: rgba(191, 139, 88, 0.25);
+            color: #4f3f2f;
+        }
+
+        .rec-icon {
+            font-size: 2rem;
+            padding: 8px;
+            background: #f7f1e7;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rec-info h5 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #3e342c;
+        }
+
+        .rec-info p {
+            font-size: 0.92rem;
+            color: #6a5a4c;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .btn-restart {
+            background: #ede6df;
+            color: #7a5235;
+            font-weight: 700;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 999px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-restart:hover {
+            background: #e2d9cf;
+            color: #5c3c24;
+            transform: translateY(-1px);
+        }
+
+        /* SVG graphics */
+        .graphic-wrapper {
+            margin: 20px auto 30px;
+            width: 140px;
+            height: 140px;
+            position: relative;
+        }
+
+        .glowing-orb {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #fcd34d 0%, #f59e0b 70%, #d97706 100%);
+            border-radius: 50%;
+            margin: 20px auto;
+            filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.6));
+            animation: pulse 4s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.6)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 40px rgba(245, 158, 11, 0.85)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-shell">
+        <div class="top-bar">
+            <a class="logo-text" href="{% url 'dashboard' %}">
+                <span class="calm-text">Calm</span><span class="sphere-text">Sphere</span>
+            </a>
+            <a href="{% url 'dashboard' %}" class="back-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 12H5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Dashboard
+            </a>
+        </div>
+
+        <div class="quiz-card" id="quizCard">
+            <!-- STEP 0: START SCREEN -->
+            <div class="quiz-screen active" id="screenStart">
+                <div class="graphic-wrapper">
+                    <div class="glowing-orb" id="startOrb"></div>
+                </div>
+                <h1 class="quiz-title" id="quizHeader">Discover Your Mood Archetype</h1>
+                <p class="quiz-desc">
+                    Welcome to the CalmSphere Mood Quiz! Tune in to your current thoughts, energy, and emotions with this simple, 5-question interactive experience. We'll reveal your personal archetype and tailor a mindfulness toolkit just for you.
+                </p>
+                <button type="button" class="btn-start" onclick="startQuiz()">Begin Quiz</button>
+            </div>
+
+            <!-- STEP 1-5: QUESTIONS (DYNAMIC) -->
+            <div class="quiz-screen" id="screenQuestion">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="progress-text" id="progressText">QUESTION 1 OF 5</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                
+                <h2 class="quiz-title" id="questionTitle" style="font-size: 1.7rem; text-align: left; margin-bottom: 25px;">
+                    Question Text
+                </h2>
+
+                <div class="choices-grid" id="choicesGrid">
+                    <!-- Dynamic choice buttons inserted here -->
+                </div>
+            </div>
+
+            <!-- STEP 6: RESULTS SCREEN -->
+            <div class="quiz-screen" id="screenResult">
+                <div class="result-panel">
+                    <div class="result-card" id="resultHeaderCard">
+                        <div style="font-size: 3.5rem;" id="archetypeEmoji">🧘</div>
+                        <h2 class="archetype-title" id="archetypeName">Zen Explorer</h2>
+                        <div class="archetype-subtitle" id="archetypeSubtitle">Calm, centered, and peacefully balanced.</div>
+                        <p class="archetype-desc" id="archetypeDesc">
+                            Your energy is gentle, focused, and steady. This is a perfect state for mindfulness, quiet reading, or gentle reflection. You are in harmony with your thoughts right now.
+                        </p>
+                    </div>
+
+                    <h3 class="recs-heading">Your Personalized Wellness Toolkit</h3>
+                    <div class="recs-grid" id="recsGrid">
+                        <!-- Dynamic recommendations inserted here -->
+                    </div>
+
+                    <button type="button" class="btn-restart" onclick="restartQuiz()">
+                        Take Quiz Again 🔄
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/global_notifications.js' %}"></script>
+    <script>
+        // Quiz Data
+        const questions = [
+            {
+                id: 1,
+                question: "How would you describe your current energy level?",
+                choices: [
+                    { text: "⚡ High voltage! Energetic & ready to conquer.", score: { sunshine: 3, chaser: 1 } },
+                    { text: "☕ Steady battery, but in need of a brief pause.", score: { explorer: 2, cocoon: 1 } },
+                    { text: "🍃 Gentle breeze, floating along peacefully.", score: { explorer: 3 } },
+                    { text: "🔋 Low battery warning (need deep rest).", score: { cocoon: 3 } }
+                ]
+            },
+            {
+                id: 2,
+                question: "If your mood today was a weather forecast, it would be:",
+                choices: [
+                    { text: "☀️ Clear skies & bright sunshine", score: { sunshine: 3 } },
+                    { text: "🌤️ Light clouds, pleasant & breezy", score: { explorer: 3 } },
+                    { text: "🌧️ Rainy afternoon, warm and cozy inside", score: { cocoon: 3 } },
+                    { text: "⛈️ Thunderstorm rolling in!", score: { chaser: 3 } }
+                ]
+            },
+            {
+                id: 3,
+                question: "Pick a comforting sound that appeals to you right now:",
+                choices: [
+                    { text: "🌊 Waves crashing on a soft sandy beach", score: { explorer: 3 } },
+                    { text: "🔥 Crackling fireplace with hot herbal tea", score: { cocoon: 3 } },
+                    { text: "🎵 Soft lofi beats in a quiet cafe", score: { sunshine: 2, explorer: 1 } },
+                    { text: "🌧️ Heavy rain drumming on the windowpane", score: { chaser: 2, cocoon: 1 } }
+                ]
+            },
+            {
+                id: 4,
+                question: "What is your main goal for the rest of today?",
+                choices: [
+                    { text: "🚀 Crush my to-do list & stay active", score: { sunshine: 3 } },
+                    { text: "🧘 Find some peace, quiet, and clarity", score: { explorer: 3 } },
+                    { text: "🛋️ Cozy up and unplug completely", score: { cocoon: 3 } },
+                    { text: "🌪️ Find a healthy way to release stress or anger", score: { chaser: 3 } }
+                ]
+            },
+            {
+                id: 5,
+                question: "Pick a color palette that speaks to you right now:",
+                choices: [
+                    { text: "🟡 Vibrant sunshine yellow", score: { sunshine: 3 } },
+                    { text: "🔵 Deep tranquil ocean blue", score: { explorer: 3 } },
+                    { text: "🟢 Fresh forest green", score: { explorer: 2, cocoon: 1 } },
+                    { text: "🔴 Electric crimson spark", score: { chaser: 3 } }
+                ]
+            }
+        ];
+
+        // Archetypes Data
+        const archetypes = {
+            sunshine: {
+                emoji: "☀️",
+                name: "Radiant Sunshine",
+                subtitle: "You are bursting with positive energy and high spirits today!",
+                desc: "Your mood is vibrant, energetic, and bright. You are in a great place to spread positive energy or direct your focus toward active, engaging tasks. Let's make sure you harness this wonderful mood!",
+                gradient: "linear-gradient(135deg, #f59e0b 0%, #e11d48 100%)",
+                recs: [
+                    {
+                        title: "Play Games",
+                        desc: "Try a game of Chess or Memory to challenge your active brain.",
+                        url: "/games/",
+                        icon: "🎮"
+                    },
+                    {
+                        title: "Express Gratitude",
+                        desc: "Write down your happy moments in the gratitude journal.",
+                        url: "/meditation/gratitude/",
+                        icon: "❤️"
+                    }
+                ]
+            },
+            explorer: {
+                emoji: "🧘",
+                name: "Zen Explorer",
+                subtitle: "You are calm, centered, and peacefully balanced.",
+                desc: "Your energy is gentle, focused, and steady. This is a perfect state for mindfulness, quiet reading, or gentle reflection. You are in harmony with your thoughts right now.",
+                gradient: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+                recs: [
+                    {
+                        title: "Guided Breathing",
+                        desc: "Tune in with our gentle breathing exercise to stay grounded.",
+                        url: "/breathing/",
+                        icon: "🌬️"
+                    },
+                    {
+                        title: "Mindful Reading",
+                        desc: "Explore a few pages of a self-help classic in our library.",
+                        url: "/reading/",
+                        icon: "📚"
+                    }
+                ]
+            },
+            cocoon: {
+                emoji: "🍂",
+                name: "Cozy Cocoon",
+                subtitle: "You are feeling quiet, reflective, or in need of gentle rest.",
+                desc: "Your body and mind are asking you to slow down, rest, and cozy up. It is completely okay to have low-energy days. Treat yourself with kindness, wrap yourself in comfort, and allow yourself to recharge.",
+                gradient: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
+                recs: [
+                    {
+                        title: "Relaxing Sounds",
+                        desc: "Listen to cozy fireplace sounds or ambient forest rain.",
+                        url: "/sound/",
+                        icon: "🎧"
+                    },
+                    {
+                        title: "Reflective Journaling",
+                        desc: "Write down your thoughts softly to unload your mind.",
+                        url: "/journal/",
+                        icon: "📔"
+                    }
+                ]
+            },
+            chaser: {
+                emoji: "⚡",
+                name: "Storm Chaser",
+                subtitle: "You are carrying high tension, stress, or restless energy.",
+                desc: "You might feel overwhelmed, anxious, or frustrated right now. Having high-energy tension can be tough, but it's also a powerful signal. Let's find some constructive ways to release this pressure and ease your mind.",
+                gradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+                recs: [
+                    {
+                        title: "Calming Breathwork",
+                        desc: "Try the 4-7-8 deep breathing technique to release stress.",
+                        url: "/meditation/breathe/",
+                        icon: "🌬️"
+                    },
+                    {
+                        title: "Bubble Pop Game",
+                        desc: "Pop virtual bubbles to visually decompress and relax.",
+                        url: "/games/bubble/",
+                        icon: "🫧"
+                    }
+                ]
+            }
+        };
+
+        // State variables
+        let currentStep = 0; // 0 = start, 1..5 = questions, 6 = results
+        let scores = { sunshine: 0, explorer: 0, cocoon: 0, chaser: 0 };
+
+        // Helper: Switch screens with fade animation
+        function transitionToScreen(nextScreenId) {
+            const currentActive = document.querySelector('.quiz-screen.active');
+            const targetScreen = document.getElementById(nextScreenId);
+
+            if (currentActive) {
+                currentActive.style.opacity = 0;
+                currentActive.style.transform = 'translateY(-15px)';
+                setTimeout(() => {
+                    currentActive.classList.remove('active');
+                    targetScreen.classList.add('active');
+                    // Force reflow
+                    targetScreen.offsetHeight;
+                    targetScreen.style.opacity = 1;
+                    targetScreen.style.transform = 'translateY(0)';
+                }, 350);
+            } else {
+                targetScreen.classList.add('active');
+                targetScreen.style.opacity = 1;
+                targetScreen.style.transform = 'translateY(0)';
+            }
+        }
+
+        // Action: Start Quiz
+        function startQuiz() {
+            currentStep = 1;
+            scores = { sunshine: 0, explorer: 0, cocoon: 0, chaser: 0 };
+            loadQuestion();
+            transitionToScreen('screenQuestion');
+        }
+
+        // Action: Load Question
+        function loadQuestion() {
+            const q = questions[currentStep - 1];
+            
+            // Progress indicators
+            document.getElementById('progressText').innerText = `QUESTION ${currentStep} OF 5`;
+            const progressPercent = (currentStep / 5) * 100;
+            document.getElementById('progressBarFill').style.width = `${progressPercent}%`;
+
+            // Question title
+            document.getElementById('questionTitle').innerText = q.question;
+
+            // Load choices
+            const choicesGrid = document.getElementById('choicesGrid');
+            choicesGrid.innerHTML = '';
+
+            q.choices.forEach((choice, idx) => {
+                const choiceBtn = document.createElement('button');
+                choiceBtn.type = 'button';
+                choiceBtn.className = 'choice-option';
+                choiceBtn.innerHTML = `
+                    <span>${choice.text}</span>
+                    <span class="choice-check"></span>
+                `;
+                
+                // Add click handler
+                choiceBtn.onclick = () => selectChoice(choice.score);
+                choicesGrid.appendChild(choiceBtn);
+            });
+        }
+
+        // Action: Select Choice
+        function selectChoice(choiceScore) {
+            // Add scores
+            for (const key in choiceScore) {
+                if (scores.hasOwnProperty(key)) {
+                    scores[key] += choiceScore[key];
+                }
+            }
+
+            if (currentStep < 5) {
+                currentStep++;
+                // Quick visual feedback before loading next question
+                setTimeout(() => {
+                    loadQuestion();
+                }, 200);
+            } else {
+                showResults();
+            }
+        }
+
+        // Action: Compute & Display Results
+        function showResults() {
+            // Find max archetype
+            let maxKey = 'explorer';
+            let maxVal = -1;
+            for (const key in scores) {
+                if (scores[key] > maxVal) {
+                    maxVal = scores[key];
+                    maxKey = key;
+                }
+            }
+
+            const arch = archetypes[maxKey];
+
+            // Render result details
+            document.getElementById('archetypeEmoji').innerText = arch.emoji;
+            document.getElementById('archetypeName').innerText = arch.name;
+            document.getElementById('archetypeSubtitle').innerText = arch.subtitle;
+            document.getElementById('archetypeDesc').innerText = arch.desc;
+
+            // Apply gradient to result header card
+            const resultCard = document.getElementById('resultHeaderCard');
+            resultCard.style.background = arch.gradient;
+
+            // Render recommendations
+            const recsGrid = document.getElementById('recsGrid');
+            recsGrid.innerHTML = '';
+
+            arch.recs.forEach(rec => {
+                const recLink = document.createElement('a');
+                recLink.href = rec.url;
+                recLink.className = 'rec-card';
+                recLink.innerHTML = `
+                    <div class="rec-icon">${rec.icon}</div>
+                    <div class="rec-info">
+                        <h5>${rec.title}</h5>
+                        <p>${rec.desc}</p>
+                    </div>
+                `;
+                recsGrid.appendChild(recLink);
+            });
+
+            // Transition to result screen
+            transitionToScreen('screenResult');
+        }
+
+        // Action: Restart Quiz
+        function restartQuiz() {
+            currentStep = 0;
+            // Set glowing orb animation back to start
+            const startOrb = document.getElementById('startOrb');
+            startOrb.style.background = 'radial-gradient(circle, #fcd34d 0%, #f59e0b 70%, #d97706 100%)';
+            startOrb.style.filter = 'drop-shadow(0 0 25px rgba(245, 158, 11, 0.6))';
+            
+            transitionToScreen('screenStart');
+        }
+    </script>
+</body>
+</html>

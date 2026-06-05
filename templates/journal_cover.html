@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Journal</title>
+    <link rel="stylesheet" href="{% static 'css/journal.css' %}">
+</head>
+
+<body>
+
+    <div class="diary-wrapper">
+
+        <div class="spiral"></div>
+
+        <div class="cover-page">
+            <a href="{% url 'journal' %}?open=true" class="open-btn">
+                Open Diary
+            </a>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

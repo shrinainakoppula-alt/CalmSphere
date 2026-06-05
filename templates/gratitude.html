@@ -1,0 +1,563 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gratitude Meditation - CalmSphere</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        :root {
+            --bg-dark: #0f0913;
+            --gold-light: #fde047;
+            --gold-primary: #eab308;
+            --orange-primary: #f97316;
+            --purple-light: #d8b4fe;
+            --card-bg: rgba(26, 16, 31, 0.65);
+            --border-color: rgba(234, 179, 8, 0.18);
+            --text-primary: #fafaf9;
+            --text-secondary: #d6d3d1;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(249, 115, 22, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sunrise background aura */
+        .sunrise-aura {
+            position: absolute;
+            bottom: -15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, rgba(234, 179, 8, 0.07) 50%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(90px);
+            animation: sunriseMovement 12s ease-in-out infinite alternate;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes sunriseMovement {
+            0% { transform: translate(-50%, 5%) scale(1); opacity: 0.6; }
+            100% { transform: translate(-50%, -10%) scale(1.25); opacity: 1; }
+        }
+
+        /* Floating Sparkles */
+        .sparkle-particle {
+            position: absolute;
+            bottom: -30px;
+            pointer-events: none;
+            z-index: 2;
+            animation: floatUp 8s linear infinite;
+            filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.6));
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-105vh) translateX(50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            z-index: 3;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Glassmorphic Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 50px 40px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 
+                0 24px 70px rgba(0, 0, 0, 0.65),
+                0 0 40px rgba(234, 179, 8, 0.05),
+                inset 0 1px 2px rgba(255, 255, 255, 0.08);
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .card-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            display: block;
+            filter: drop-shadow(0 0 15px rgba(249, 115, 22, 0.3));
+            animation: gentleGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes gentleGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.3)); }
+            100% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(234, 179, 8, 0.6)); }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .duration-tag {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin-bottom: 35px;
+            display: inline-block;
+            background: rgba(234, 179, 8, 0.1);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(234, 179, 8, 0.15);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange-primary) 0%, var(--gold-primary) 100%);
+            color: #0f0913;
+            border: none;
+            padding: 15px 36px;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 25px rgba(249, 115, 22, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(249, 115, 22, 0.4);
+            filter: brightness(1.05);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 15px 36px;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Reflection text styling */
+        .reflection-content {
+            margin: 30px 0 40px 0;
+        }
+
+        .reflection-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+        }
+
+        .reflection-desc {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-weight: 400;
+            margin-bottom: 15px;
+        }
+
+        .reflection-subtext {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .bullet-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Journal input */
+        .journal-container {
+            margin: 25px 0 35px 0;
+            text-align: left;
+        }
+
+        .journal-label {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--gold-primary);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.25);
+        }
+
+        /* Completion list styling */
+        .summary-box {
+            background: rgba(234, 179, 8, 0.05);
+            border: 1px solid rgba(234, 179, 8, 0.15);
+            border-radius: 20px;
+            padding: 24px;
+            margin: 25px 0 30px 0;
+            text-align: left;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
+        }
+
+        .summary-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .summary-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .completion-reflection {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 35px;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.95rem;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sunrise-aura"></div>
+
+<div class="container">
+
+    <!-- Screen 1: Welcome Screen -->
+    <div id="screen1" class="card">
+        <span class="card-emoji">🙏</span>
+        <h1>Gratitude Meditation</h1>
+        <p class="subtitle">Cultivate positivity by reflecting on the people, moments, and experiences you appreciate.</p>
+        <div>
+            <span class="duration-tag">Duration: 3-5 Minutes</span>
+        </div>
+        <button class="btn-primary" onclick="showScreen(2)">Begin Reflection</button>
+    </div>
+
+    <!-- Screen 2: Reflection 1 (People) -->
+    <div id="screen2" class="card hidden">
+        <span class="card-emoji">❤️</span>
+        <div class="reflection-content">
+            <h2 class="reflection-title">People</h2>
+            <p class="reflection-desc">Think of someone who has helped, supported, or cared about you.</p>
+            <p class="reflection-subtext">Take a moment to appreciate them.</p>
+        </div>
+        <button class="btn-primary" onclick="showScreen(3)">Next</button>
+    </div>
+
+    <!-- Screen 3: Reflection 2 (Positive Moment) -->
+    <div id="screen3" class="card hidden">
+        <span class="card-emoji">🌟</span>
+        <div class="reflection-content">
+            <h2 class="reflection-title">Positive Moment</h2>
+            <p class="reflection-desc">Think about something good that happened recently.</p>
+            <p class="reflection-subtext">It can be something small:</p>
+            <div class="bullet-list">
+                <div>✨ A smile</div>
+                <div>✨ A conversation</div>
+                <div>✨ A success</div>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="showScreen(4)">Next</button>
+    </div>
+
+    <!-- Screen 4: Reflection 3 (Yourself) -->
+    <div id="screen4" class="card hidden">
+        <span class="card-emoji">🌱</span>
+        <div class="reflection-content">
+            <h2 class="reflection-title">Yourself</h2>
+            <p class="reflection-desc">Think about a quality you appreciate in yourself.</p>
+            <p class="reflection-subtext">Perhaps your kindness, patience, or determination.</p>
+        </div>
+        <button class="btn-primary" onclick="showScreen(5)">Next</button>
+    </div>
+
+    <!-- Screen 5: Reflection 4 (Life) -->
+    <div id="screen5" class="card hidden">
+        <span class="card-emoji">🌍</span>
+        <div class="reflection-content">
+            <h2 class="reflection-title">Life</h2>
+            <p class="reflection-desc">Think of something in your daily life that you're grateful for.</p>
+            <div class="bullet-list" style="margin-top: 20px;">
+                <div>🏡 Your home</div>
+                <div>🎓 Your education</div>
+                <div>👥 Your friends</div>
+                <div>💡 Your opportunities</div>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="showScreen(6)">Next</button>
+    </div>
+
+    <!-- Screen 6: Optional Journal Step -->
+    <div id="screen6" class="card hidden">
+        <span class="card-emoji">✍</span>
+        <h1>Write One Thing</h1>
+        <p class="subtitle" style="margin-bottom: 20px;">What are you grateful for today?</p>
+        
+        <div class="journal-container">
+            <textarea id="gratitudeText" placeholder="I am grateful for..."></textarea>
+            <div id="saveError" class="error-message">Failed to save. Please try again.</div>
+        </div>
+        
+        <button id="saveBtn" class="btn-primary" onclick="saveReflection()">Save Reflection</button>
+    </div>
+
+    <!-- Screen 7: Completion Screen -->
+    <div id="screen7" class="card hidden">
+        <span class="card-emoji">✨</span>
+        <h1>Gratitude Session Complete</h1>
+        
+        <div class="summary-box">
+            <p class="summary-title">Today you reflected on:</p>
+            <ul class="summary-list">
+                <li>❤️ Relationships</li>
+                <li>🌟 Positive Experiences</li>
+                <li>🌱 Personal Strengths</li>
+                <li>🌍 Everyday Blessings</li>
+            </ul>
+        </div>
+        
+        <p class="completion-reflection">Remember: Small moments matter.</p>
+        
+        <button class="btn-primary" onclick="location.href='/dashboard'">Back Home</button>
+    </div>
+
+</div>
+
+<!-- CSRF Token for Django AJAX -->
+{% csrf_token %}
+
+<script>
+    // Screen transition controller
+    function showScreen(screenNum) {
+        // Hide all screens
+        for (let i = 1; i <= 7; i++) {
+            const screen = document.getElementById('screen' + i);
+            if (screen) {
+                screen.classList.add('hidden');
+            }
+        }
+        // Show target screen
+        const targetScreen = document.getElementById('screen' + screenNum);
+        if (targetScreen) {
+            targetScreen.classList.remove('hidden');
+        }
+    }
+
+    // Sparkle Particle Generator
+    function createSparkle() {
+        const sparkle = document.createElement("div");
+        sparkle.className = "sparkle-particle";
+        
+        // Randomly pick a character
+        const particles = ["✨", "❤️", "⭐", "🌟"];
+        sparkle.textContent = particles[Math.floor(Math.random() * particles.length)];
+        
+        // Random positioning and sizes
+        sparkle.style.left = Math.random() * 100 + "vw";
+        sparkle.style.fontSize = Math.random() * 15 + 10 + "px";
+        sparkle.style.animationDuration = Math.random() * 5 + 4 + "s"; // 4-9 seconds
+        sparkle.style.opacity = Math.random() * 0.7 + 0.2;
+        
+        document.body.appendChild(sparkle);
+        
+        // Auto-cleanup
+        setTimeout(() => {
+            sparkle.remove();
+        }, 9000);
+    }
+
+    // Start generating particles
+    setInterval(createSparkle, 700);
+
+    // Save reflection to Journal (AJAX POST)
+    function saveReflection() {
+        const text = document.getElementById("gratitudeText").value.trim();
+        const saveBtn = document.getElementById("saveBtn");
+        const saveError = document.getElementById("saveError");
+        
+        if (!text) {
+            // If empty, just skip to completion page without saving
+            showScreen(7);
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+        saveError.style.display = "none";
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch("", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken
+            },
+            body: JSON.stringify({ text: text })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error("Network response was not ok.");
+        })
+        .then(data => {
+            if (data.status === "success") {
+                showScreen(7);
+            } else {
+                showError();
+            }
+        })
+        .catch(error => {
+            console.error("Error saving reflection:", error);
+            showError();
+        });
+
+        function showError() {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save Reflection";
+            saveError.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>

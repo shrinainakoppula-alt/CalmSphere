@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sound Therapy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+            background: #f7f4f1;
+            color: #2e2a28;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #3f2f20;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 70%;
+            margin: auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            background: #eef5ff;
+        }
+
+        .icon {
+            font-size: 30px;
+        }
+
+        .back-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            text-decoration: none;
+            background: #bf8c587e;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #a97545;
+        }
+
+        /* VIDEO BACKGROUND */
+        #bgVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            display: none;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f7f4f1;
+            z-index: -1;
+        }
+
+        audio {
+            margin-top: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- BACKGROUND VIDEO -->
+    <video id="bgVideo" autoplay muted loop></video>
+    <div id="overlay"></div>
+
+    <a href="{% url 'dashboard' %}" class="back-btn">← Back</a>
+
+    <h1>Sound Therapy</h1>
+
+    <div class="container">
+
+        <div class="card" onclick="playSound('rain')">
+            <div class="icon">🌧️</div>
+            Rain
+        </div>
+
+        <div class="card" onclick="playSound('waves')">
+            <div class="icon">🌊</div>
+            Beach Waves
+        </div>
+
+        <div class="card" onclick="playSound('birds')">
+            <div class="icon">🐦</div>
+            Birds
+        </div>
+
+        <div class="card" onclick="playSound('nature')">
+            <div class="icon">🌿</div>
+            Nature Calm
+        </div>
+
+        <div class="card" onclick="playSound('thunder')">
+            <div class="icon">⛈️</div>
+            Thunder
+        </div>
+
+        <div class="card" onclick="playSound('river')">
+            <div class="icon">🏞️</div>
+            River Flow
+        </div>
+
+        <div class="card" onclick="playSound('piano')">
+            <div class="icon">🎹</div>
+            Soft Piano
+        </div>
+
+        <div class="card" onclick="playSound('chimes')">
+            <div class="icon">🔔</div>
+            Wind Chimes
+        </div>
+
+        <div class="card" onclick="playSound('meditation')">
+            <div class="icon">🧘</div>
+            Meditation Music
+        </div>
+
+    </div>
+
+    <!-- AUDIO PLAYER -->
+    <audio id="audioPlayer" controls></audio>
+
+    <script>
+        function playSound(name) {
+            const player = document.getElementById("audioPlayer");
+            const video = document.getElementById("bgVideo");
+            const overlay = document.getElementById("overlay");
+
+            player.src = "/static/sounds/" + name + ".mp3";
+            player.play();
+
+            // show video
+            video.style.display = "block";
+
+            // hide color overlay
+            overlay.style.display = "none";
+
+            video.src = "/static/videos/" + name + ".mp4";
+            video.load();
+            video.play();
+        }
+    </script>
+
+</body>
+
+</html>

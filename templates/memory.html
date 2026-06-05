@@ -1,0 +1,284 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match – CalmSphere</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a0a 0%, #2d4a10 50%, #1a3a20 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 16px;
+            color: white;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #a8e890;
+        }
+
+        .stats {
+            display: flex;
+            gap: 28px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #a8e890;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-val {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: min(440px, 92vw);
+        }
+
+        .card {
+            aspect-ratio: 1;
+            perspective: 600px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.45s ease;
+            border-radius: 14px;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-back {
+            background: linear-gradient(135deg, #4a9a30, #6ac44a) !important;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backface-visibility: hidden;
+            font-size: clamp(22px, 7vw, 36px);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #2a4a18, #3a6420);
+            border: 1px solid rgba(168, 232, 144, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front::after {
+            content: '🌿';
+            font-size: clamp(18px, 5vw, 28px);
+            opacity: 0.5;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #5aaa38, #80d458);
+            transform: rotateY(180deg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button.btn-action {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-new {
+            background: #a8e890;
+            color: #1a2a0a;
+        }
+
+        .btn-new:hover {
+            background: #c0f0a0;
+            transform: translateY(-2px);
+        }
+
+        .win-msg {
+            font-size: 18px;
+            color: #a8e890;
+            font-weight: 600;
+            min-height: 28px;
+            margin-top: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <a href="{% url 'games' %}" class="back-btn">← Games</a>
+        <h1>🃏 Memory Match</h1>
+        <div style="width:80px"></div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-label">Moves</div>
+            <div class="stat-val" id="moves">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Pairs</div>
+            <div class="stat-val" id="pairs">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Best</div>
+            <div class="stat-val" id="best">—</div>
+        </div>
+    </div>
+
+    <div id="grid"></div>
+
+    <div class="win-msg" id="win"></div>
+
+    <div class="controls">
+        <button class="btn-action btn-new" onclick="newGame()">New Game</button>
+    </div>
+
+    <script>
+        const SYMBOLS = ['🌸', '🌿', '🍃', '🌊', '🌙', '⭐', '🦋', '🌺'];
+        let cards, flipped, matched, moves, lock, best = null;
+
+        function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+        function newGame() {
+            const deck = shuffle([...SYMBOLS, ...SYMBOLS]);
+            cards = deck.map((sym, i) => ({ sym, id: i, isFlipped: false, isMatched: false }));
+            flipped = []; matched = 0; moves = 0; lock = false;
+            updateStats();
+            document.getElementById('win').textContent = '';
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const g = document.getElementById('grid');
+            g.innerHTML = '';
+            cards.forEach((c, i) => {
+                const div = document.createElement('div');
+                div.className = 'card' + (c.isFlipped ? ' flipped' : '') + (c.isMatched ? ' matched' : '');
+                div.innerHTML = `<div class="card-inner"><div class="card-front"></div><div class="card-back">${c.sym}</div></div>`;
+                div.addEventListener('click', () => flipCard(i));
+                g.appendChild(div);
+            });
+        }
+
+        function flipCard(i) {
+            if (lock || cards[i].isFlipped || cards[i].isMatched) return;
+            cards[i].isFlipped = true;
+            flipped.push(i);
+            renderGrid();
+            if (flipped.length === 2) {
+                moves++;
+                updateStats();
+                lock = true;
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [a, b] = flipped;
+            if (cards[a].sym === cards[b].sym) {
+                cards[a].isMatched = cards[b].isMatched = true;
+                matched++;
+                updateStats();
+                if (matched === SYMBOLS.length) {
+                    if (best === null || moves < best) best = moves;
+                    document.getElementById('best').textContent = best;
+                    document.getElementById('win').textContent = `🎉 Completed in ${moves} moves!`;
+                }
+            } else {
+                cards[a].isFlipped = cards[b].isFlipped = false;
+            }
+            flipped = [];
+            lock = false;
+            renderGrid();
+        }
+
+        function updateStats() {
+            document.getElementById('moves').textContent = moves;
+            document.getElementById('pairs').textContent = matched + '/' + SYMBOLS.length;
+            if (best !== null) document.getElementById('best').textContent = best;
+        }
+
+        newGame();
+    </script>
+</body>
+
+</html>
